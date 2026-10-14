@@ -12,9 +12,9 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1.0.104"
 eframe = { version = "0.36.2", default-features = false, features = ["accesskit", "default_fonts", "glow", "wayland", "x11"] }
-hidra = { path = "../hidra" }
+hidra = { path = "crates/hidra" }
 libc = "0.2.190"
-remora = { path = "../remora" }
+remora = { path = "crates/remora" }
 rfd = "0.17.2"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.153"

@@ -1307,9 +1307,7 @@ name = "hidra"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "eframe",
  "libc",
- "rfd",
  "serde",
  "serde_json",
 ]
@@ -2319,7 +2317,6 @@ name = "remora"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "eframe",
  "libc",
  "serde",
  "serde_json",

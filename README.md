@@ -5,10 +5,11 @@ and the M-Vave Tank-G guitar pedal. The home screen shows the three side by
 side; click one to open its pages.
 
 - **Mouse**: DPI stages, polling, sensor, lighting, button bindings, sleep.
-  Uses [remora](../remora) as a library and shares its remembered profile
+  Uses the core of [remora](https://github.com/VitorCdSouza/remora) (`crates/remora`) and shares its remembered profile
   (`~/.config/remora/mouse.json`), since the X6 cannot report its settings.
 - **Keyboard**: keymap, knob, lighting, macros, key tester, Windows/Mac
-  switch, VIA layout files. Uses [hidra](../hidra) as a library and its
+  switch, VIA layout files. Uses the core of
+  [hidra](https://github.com/VitorCdSouza/hidra) (`crates/hidra`) and its
   definitions and mode files under `~/.config/hidra`.
 - **Pedal**: the sounding preset's six blocks edited live, save / save to,
   bypass, the 36-preset grid, backup and restore. The protocol is ported from
@@ -26,7 +27,9 @@ install -Dm644 packaging/octo-hub.desktop ~/.local/share/applications/octo-hub.d
 install -Dm644 packaging/octo-hub.svg ~/.local/share/icons/hicolor/scalable/apps/octo-hub.svg
 ```
 
-hidra and remora must sit next to this folder (`../hidra`, `../remora`).
+`crates/hidra` and `crates/remora` are copies of the library modules of
+hidra and remora (no GUI or CLI); changes to either upstream have to be
+copied in by hand.
 
 ## Flags
 
