@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#131416;color:#e8e6e1;font-family:Ubuntu,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button,input,textarea,select{font-family:inherit}
+a{color:#f0914e}a:hover{color:#f5ad79}
+@keyframes oh-breathe{0%,100%{opacity:.18}50%{opacity:1}}
+@keyframes oh-hue{to{filter:hue-rotate(360deg)}}
+@keyframes oh-hue-breathe{0%{filter:hue-rotate(0);opacity:.2}50%{opacity:1}100%{filter:hue-rotate(360deg);opacity:.2}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#131416">
+
+  <!-- top bar -->
+  <div style="height:56px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px;background:#17181b;border-bottom:1px solid #232529;position:relative;z-index:20">
+    <div onClick="{{ goHome }}" title="All devices" style="flex:none;display:flex;align-items:center;gap:9px;padding:6px 10px 6px 7px;border-radius:8px;cursor:pointer" style-hover="background:#222428">
+      <div style="width:22px;height:22px;border-radius:50%;background:#f0914e;position:relative">
+        <div style="position:absolute;left:6px;top:8px;width:4px;height:4px;border-radius:50%;background:#2a1406"></div>
+        <div style="position:absolute;left:12px;top:8px;width:4px;height:4px;border-radius:50%;background:#2a1406"></div>
+      </div>
+      <span style="font-size:15px;font-weight:500;white-space:nowrap">octo hub</span>
+    </div>
+
+    <sc-if value="{{ isDevice }}" hint-placeholder-val="{{ false }}">
+      <div style="width:1px;height:24px;background:#2e3035"></div>
+      <div style="position:relative;flex:none">
+        <div onClick="{{ toggleMenu }}" style="display:flex;align-items:center;gap:8px;height:36px;padding:0 10px 0 6px;border-radius:8px;cursor:pointer;color:#c4c2bc" style-hover="background:#222428">
+          <div style="width:24px;height:24px;overflow:hidden"><div style="transform:scale(.5);transform-origin:0 0">
+            <sc-if value="{{ cur.isMouse }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:10px;top:4px;width:28px;height:40px;border:3px solid currentColor;border-radius:14px"></div><div style="position:absolute;left:22px;top:11px;width:4px;height:9px;border-radius:2px;background:currentColor"></div></div></sc-if>
+            <sc-if value="{{ cur.isKb }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:1px;top:10px;width:46px;height:28px;border:3px solid currentColor;border-radius:6px"></div><div style="position:absolute;left:9px;top:17px;width:30px;height:4px;border-radius:2px;background:currentColor"></div><div style="position:absolute;left:14px;top:26px;width:20px;height:4px;border-radius:2px;background:currentColor"></div></div></sc-if>
+            <sc-if value="{{ cur.isPedal }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:3px;top:7px;width:42px;height:34px;border:3px solid currentColor;border-radius:7px"></div><div style="position:absolute;left:11px;top:14px;width:6px;height:6px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:21px;top:14px;width:6px;height:6px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:31px;top:14px;width:6px;height:6px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:10px;top:25px;width:10px;height:10px;border-radius:50%;border:3px solid currentColor"></div><div style="position:absolute;left:28px;top:25px;width:10px;height:10px;border-radius:50%;border:3px solid currentColor"></div></div></sc-if>
+          </div></div>
+          <span style="font-size:14px;color:#e8e6e1;white-space:nowrap">{{ cur.name }}</span>
+          <span style="font-size:10px;color:#8e8f93">▼</span>
+        </div>
+        <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:1"></div>
+          <div style="position:absolute;top:42px;left:0;z-index:2;width:300px;background:#1e2023;border:1px solid #2e3035;border-radius:12px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.open }}" style="display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;cursor:pointer;background:{{ d.menuBg }};opacity:{{ d.opacity }}" style-hover="background:#26282c">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px">{{ d.name }}</div>
+                  <div style="font-size:12px;color:#8e8f93;margin-top:2px">{{ d.menuSub }}</div>
+                </div>
+                <span style="width:7px;height:7px;border-radius:50%;background:{{ d.connColor }}"></span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex:none;display:flex;gap:2px;padding:3px;background:#131416;border:1px solid #232529;border-radius:9px;margin-left:6px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <div onClick="{{ t.onClick }}" style="flex:none;white-space:nowrap;padding:6px 13px;border-radius:7px;font-size:13.5px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}" style-hover="color:#e8e6e1">{{ t.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="flex:1"></div>
+
+    <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:40;padding:9px 16px;border-radius:9px;background:#1e2023;border:1px solid #2e3035;box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px;color:#8cc79b;white-space:nowrap">✓ {{ savedText }}</div>
+    </sc-if>
+
+    <sc-if value="{{ isMouse }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:14px;padding:0 6px;font-size:13px">
+        <div onClick="{{ toDpi }}" title="DPI stage in use" style="display:flex;align-items:center;gap:7px;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:{{ mStatus.dot }}"></span><span style="font-family:'JetBrains Mono',monospace;font-weight:600">{{ mStatus.dpi }}</span><span style="color:#8e8f93">DPI</span></div>
+        <div style="width:1px;height:18px;background:#2e3035"></div>
+        <div onClick="{{ toPower }}" title="Battery" style="display:flex;align-items:center;gap:7px;cursor:pointer;color:#8cc79b">
+          <div style="width:20px;height:11px;border:1.5px solid currentColor;border-radius:3px;padding:1px;position:relative"><div style="height:100%;width:{{ mStatus.bat }};background:currentColor;border-radius:1px"></div></div>
+          <span>{{ mStatus.batText }}</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isKb }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ toKbDevice }}" title="Windows / Mac layout" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:7px;border:1px solid #2e3035;font-size:13px;cursor:pointer" style-hover="background:#222428">
+        <span style="color:#8e8f93">Layout</span><span>{{ kStatus.mode }}</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isPedalLive }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:8px;padding:0 6px;font-size:13px">
+        <span style="color:#8e8f93">Playing</span><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:#f0914e">{{ pStatus.slot }}</span>
+        <sc-if value="{{ pStatus.bypass }}"><span style="color:#8e8f93">· bypassed</span></sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- HOME -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;padding:48px 28px 60px;display:flex;justify-content:center">
+      <div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:22px">
+        <div style="font-size:24px;font-weight:300">Devices</div>
+
+        <sc-if value="{{ homeCards }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px">
+            <sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.open }}" style="background:#1a1b1e;border:1px solid #26282c;border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s, transform .15s;opacity:{{ d.opacity }}" style-hover="border-color:#4a4c52;transform:translateY(-2px)">
+                <div style="height:168px;display:flex;align-items:center;justify-content:center;background:#16171a;border-bottom:1px solid #222428;color:#c4c2bc">
+                  <div style="transform:scale(1.7)">
+                    <sc-if value="{{ d.isMouse }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:10px;top:4px;width:28px;height:40px;border:2px solid currentColor;border-radius:14px"></div><div style="position:absolute;left:23px;top:10px;width:2px;height:9px;border-radius:1px;background:currentColor"></div></div></sc-if>
+                    <sc-if value="{{ d.isKb }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:1px;top:11px;width:46px;height:27px;border:2px solid currentColor;border-radius:5px"></div><div style="position:absolute;left:8px;top:17px;width:32px;height:3px;border-radius:2px;background:currentColor;opacity:.8"></div><div style="position:absolute;left:8px;top:23px;width:32px;height:3px;border-radius:2px;background:currentColor;opacity:.8"></div><div style="position:absolute;left:15px;top:30px;width:18px;height:3px;border-radius:2px;background:currentColor"></div></div></sc-if>
+                    <sc-if value="{{ d.isPedal }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:3px;top:8px;width:42px;height:32px;border:2px solid currentColor;border-radius:6px"></div><div style="position:absolute;left:11px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:21.5px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:32px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:10px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div><div style="position:absolute;left:28px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div></div></sc-if>
+                  </div>
+                </div>
+                <div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:14px">
+                  <div>
+                    <div style="font-size:16px">{{ d.name }}</div>
+                    <div style="font-size:13px;color:#8e8f93;margin-top:3px">{{ d.kind }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+                    <div style="display:flex;align-items:baseline;gap:7px">
+                      <sc-if value="{{ d.hasDot }}"><span style="width:9px;height:9px;border-radius:50%;background:{{ d.headDot }};align-self:center"></span></sc-if>
+                      <span style="font-size:22px;font-weight:{{ d.headWeight }};font-family:{{ d.headFont }}">{{ d.head }}</span>
+                      <span style="font-size:13px;color:#8e8f93">{{ d.headUnit }}</span>
+                    </div>
+                    <sc-if value="{{ d.hasBattery }}">
+                      <div style="display:flex;align-items:center;gap:7px;color:#8cc79b;font-size:13px">
+                        <div style="width:22px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1px"><div style="height:100%;width:{{ d.bat }};background:currentColor;border-radius:1px"></div></div>{{ d.batText }}
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#8e8f93;padding-top:12px;border-top:1px solid #232529">
+                    <span style="width:7px;height:7px;border-radius:50%;background:{{ d.connColor }}"></span>{{ d.conn }}
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ homeRows }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:14px;overflow:hidden">
+            <sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.open }}" style="display:grid;grid-template-columns:56px minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) 20px;align-items:center;gap:18px;padding:16px 22px;border-top:1px solid {{ d.rowLine }};cursor:pointer;opacity:{{ d.opacity }}" style-hover="background:#1f2124">
+                <div style="width:48px;height:48px;color:#c4c2bc">
+                  <sc-if value="{{ d.isMouse }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:10px;top:4px;width:28px;height:40px;border:2px solid currentColor;border-radius:14px"></div><div style="position:absolute;left:23px;top:10px;width:2px;height:9px;border-radius:1px;background:currentColor"></div></div></sc-if>
+                  <sc-if value="{{ d.isKb }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:1px;top:11px;width:46px;height:27px;border:2px solid currentColor;border-radius:5px"></div><div style="position:absolute;left:8px;top:17px;width:32px;height:3px;border-radius:2px;background:currentColor;opacity:.8"></div><div style="position:absolute;left:8px;top:23px;width:32px;height:3px;border-radius:2px;background:currentColor;opacity:.8"></div><div style="position:absolute;left:15px;top:30px;width:18px;height:3px;border-radius:2px;background:currentColor"></div></div></sc-if>
+                  <sc-if value="{{ d.isPedal }}"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:3px;top:8px;width:42px;height:32px;border:2px solid currentColor;border-radius:6px"></div><div style="position:absolute;left:11px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:21.5px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:32px;top:14px;width:5px;height:5px;border-radius:50%;background:currentColor"></div><div style="position:absolute;left:10px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div><div style="position:absolute;left:28px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div></div></sc-if>
+                </div>
+                <div><div style="font-size:15px">{{ d.name }}</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">{{ d.kind }}</div></div>
+                <div style="display:flex;align-items:baseline;gap:7px">
+                  <sc-if value="{{ d.hasDot }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ d.headDot }};align-self:center"></span></sc-if>
+                  <span style="font-size:17px;font-family:{{ d.headFont }}">{{ d.head }}</span><span style="font-size:12.5px;color:#8e8f93">{{ d.headUnit }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#8e8f93"><span style="width:7px;height:7px;border-radius:50%;background:{{ d.connColor }}"></span>{{ d.connShort }}</div>
+                <span style="color:#6b6d72">›</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- DEVICE BODY -->
+  <sc-if value="{{ isDevice }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;overflow:auto">
+      <div style="max-width:1240px;margin:0 auto;padding:22px 24px 48px">
+
+        <!-- ===== MOUSE ===== -->
+        <sc-if value="{{ mTab.dpi }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
+                <div>
+                  <div style="font-size:15px;font-weight:500">DPI stages</div>
+                  <div style="font-size:12.5px;color:#8e8f93;margin-top:3px">The DPI button on the mouse steps through these. Click one to use and edit it.</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button onClick="{{ m.stageMinus }}" title="Remove the last stage" style="width:30px;height:30px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:15px;cursor:pointer">−</button>
+                  <span style="font-size:13px;color:#c4c2bc;min-width:66px;text-align:center">{{ m.stageCount }} stages</span>
+                  <button onClick="{{ m.stagePlus }}" title="Add a stage" style="width:30px;height:30px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:15px;cursor:pointer">+</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px">
+                <sc-for list="{{ m.stages }}" as="st" hint-placeholder-count="6">
+                  <div onClick="{{ st.pick }}" style="padding:10px 12px 12px;border-radius:9px;border:1.5px solid {{ st.bd }};background:{{ st.bg }};cursor:pointer" style-hover="border-color:#4a4c52">
+                    <div style="height:4px;border-radius:2px;background:{{ st.c }}"></div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#8e8f93;margin-top:10px"><span>{{ st.n }}</span><span style="color:#f0914e">{{ st.tag }}</span></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;margin-top:2px">{{ st.dpi }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:18px;padding-top:16px;border-top:1px solid #25272b;display:grid;grid-template-columns:90px minmax(0,1fr);row-gap:14px;column-gap:16px;align-items:center">
+                <span style="font-size:13px;color:#8e8f93">DPI</span>
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                  <div onPointerDown="{{ m.dpiS.down }}" style="position:relative;height:22px;width:300px;max-width:100%;cursor:pointer;touch-action:none">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                    <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ m.dpiS.pct }}"></div>
+                    <div style="position:absolute;top:2px;left:{{ m.dpiS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1;box-shadow:0 1px 3px rgba(0,0,0,.4)"></div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;padding:5px 10px;border-radius:7px;background:#131416;border:1px solid #2e3035;min-width:92px;text-align:center">{{ m.editDpi }} DPI</span>
+                </div>
+                <span></span>
+                <div style="display:flex;gap:4px;flex-wrap:wrap">
+                    <sc-for list="{{ m.dpiPresets }}" as="o" hint-placeholder-count="8">
+                      <div onClick="{{ o.onClick }}" style="padding:5px 9px;border-radius:6px;font-size:12.5px;font-family:'JetBrains Mono',monospace;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}" style-hover="color:#e8e6e1">{{ o.label }}</div>
+                    </sc-for>
+                  </div>
+                <span style="font-size:13px;color:#8e8f93">Colour</span>
+                <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                  <sc-for list="{{ m.swatches }}" as="w" hint-placeholder-count="10">
+                    <div onClick="{{ w.onClick }}" style="width:22px;height:22px;border-radius:50%;background:{{ w.c }};cursor:pointer;box-shadow:{{ w.ring }}"></div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:6px 20px">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #25272b">
+                <div><div style="font-size:14px">Polling rate</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">How often the mouse reports. Lower saves battery.</div></div>
+                <div style="display:inline-flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px">
+                  <sc-for list="{{ m.polling }}" as="o" hint-placeholder-count="4"><div onClick="{{ o.onClick }}" style="padding:5px 13px;border-radius:6px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #25272b">
+                <div><div style="font-size:14px">Lift-off distance</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">Height at which the sensor stops tracking.</div></div>
+                <div style="display:inline-flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px">
+                  <sc-for list="{{ m.lift }}" as="o" hint-placeholder-count="2"><div onClick="{{ o.onClick }}" style="padding:5px 13px;border-radius:6px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #25272b">
+                <div><div style="font-size:14px">Angle snapping</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">Straightens near-horizontal and near-vertical movement.</div></div>
+                <div onClick="{{ m.snap.onClick }}" style="width:40px;height:22px;border-radius:11px;background:{{ m.snap.bg }};position:relative;cursor:pointer;transition:background .15s"><div style="position:absolute;top:3px;left:{{ m.snap.x }};width:16px;height:16px;border-radius:50%;background:#e8e6e1;transition:left .15s"></div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0">
+                <div><div style="font-size:14px">Ripple control</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">Smooths jitter at high DPI, at a little latency.</div></div>
+                <div onClick="{{ m.ripple.onClick }}" style="width:40px;height:22px;border-radius:11px;background:{{ m.ripple.bg }};position:relative;cursor:pointer;transition:background .15s"><div style="position:absolute;top:3px;left:{{ m.ripple.x }};width:16px;height:16px;border-radius:50%;background:#e8e6e1;transition:left .15s"></div></div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ mTab.lighting }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);gap:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:10px">
+              <sc-for list="{{ m.effects }}" as="e" hint-placeholder-count="7">
+                <div onClick="{{ e.onClick }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid {{ e.bd }};background:{{ e.bg }}" style-hover="background:#222428">
+                  <span style="font-size:14px;color:{{ e.fg }}">{{ e.name }}</span><span style="font-size:12px;color:#8e8f93">{{ e.note }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:22px">
+              <div style="padding:8px 0;display:flex;align-items:center;justify-content:center">
+                <div style="position:relative;width:124px;height:208px;margin:16px 0">
+                  <div style="position:absolute;inset:0;border-radius:62px;border:2px solid #55585e"></div>
+                  <div style="position:absolute;left:2px;right:2px;top:81px;height:2px;background:#3a3d42"></div>
+                  <div style="position:absolute;left:50%;margin-left:-1px;top:2px;width:2px;height:79px;background:#3a3d42"></div>
+                  <div style="position:absolute;left:50%;transform:translateX(-50%);top:44px;width:24px;height:80px;border-radius:6px;border:2px solid #55585e;background:#1a1b1e"></div>
+                  <div style="position:absolute;left:50%;transform:translateX(-50%);top:14px;width:20px;height:34px;border-radius:10px;border:2px solid #55585e;background:#1a1b1e"></div>
+                  <div style="position:absolute;left:50%;transform:translateX(-50%);top:62px;width:14px;height:18px;border-radius:4px;border:2px solid #55585e;background:#1a1b1e"></div>
+                  <div style="position:absolute;left:50%;transform:translateX(-50%);top:84px;width:14px;height:18px;border-radius:4px;border:2px solid #55585e;background:#1a1b1e"></div>
+                  <div style="position:absolute;left:calc(50% - 4px);top:110px;width:8px;height:8px;border-radius:50%;background:#2e3035;box-shadow:0 0 0 3px #1a1b1e"></div>
+                  {{ m.glow }}
+                </div>
+              </div>
+              <sc-if value="{{ m.showColour }}">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                  <span style="font-size:13px;color:#8e8f93">Colour</span>
+                  <div style="display:flex;gap:9px;flex-wrap:wrap;justify-content:center">
+                  <sc-for list="{{ m.lightSwatches }}" as="w" hint-placeholder-count="10"><div onClick="{{ w.onClick }}" style="width:22px;height:22px;border-radius:50%;background:{{ w.c }};cursor:pointer;box-shadow:{{ w.ring }}"></div></sc-for>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ m.showDpiNote }}">
+                <div style="font-size:13px;color:#8e8f93">Lights up in the colour of the DPI stage in use. <span onClick="{{ toDpi }}" style="color:#f0914e;cursor:pointer">Change stage colours</span></div>
+              </sc-if>
+              <sc-if value="{{ m.showSpeed }}">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-size:13px;color:#8e8f93">Speed</span>
+                  <div style="display:inline-flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px">
+                    <sc-for list="{{ m.speeds }}" as="o" hint-placeholder-count="5"><div onClick="{{ o.onClick }}" style="padding:5px 12px;border-radius:6px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ mTab.buttons }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:24px 14px 10px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;justify-content:center">
+                <div style="position:relative;width:136px;height:228px;margin:6px 0 6px 10px">
+                  <div style="position:absolute;inset:0;border-radius:68px;border:2px solid #55585e;overflow:hidden">
+                    <div onClick="{{ m.z0.onClick }}" style="position:absolute;left:0;top:0;width:50%;height:87px;border-right:1px solid;border-bottom:2px solid;background:{{ m.z0.fill }};border-color:{{ m.z0.stroke }};cursor:pointer" style-hover="filter:brightness(1.3)"></div>
+                    <div onClick="{{ m.z1.onClick }}" style="position:absolute;right:0;top:0;width:50%;height:87px;border-left:1px solid;border-bottom:2px solid;background:{{ m.z1.fill }};border-color:{{ m.z1.stroke }};cursor:pointer" style-hover="filter:brightness(1.3)"></div>
+                  </div>
+                  <div style="position:absolute;left:50%;transform:translateX(-50%);top:50px;width:26px;height:84px;border-radius:6px;border:2px solid #55585e;background:#1a1b1e;pointer-events:none"></div>
+                  <div onClick="{{ m.z2.onClick }}" style="position:absolute;left:50%;transform:translateX(-50%);top:16px;width:22px;height:38px;border-radius:11px;border:2px solid;background:{{ m.z2.fill }};border-color:{{ m.z2.stroke }};cursor:pointer"></div>
+                  <div onClick="{{ m.z5.onClick }}" style="position:absolute;left:50%;transform:translateX(-50%);top:66px;width:16px;height:20px;border-radius:4px;border:2px solid;background:{{ m.z5.fill }};border-color:{{ m.z5.stroke }};cursor:pointer"></div>
+                  <div onClick="{{ m.z6.onClick }}" style="position:absolute;left:50%;transform:translateX(-50%);top:90px;width:16px;height:20px;border-radius:4px;border:2px solid;background:{{ m.z6.fill }};border-color:{{ m.z6.stroke }};cursor:pointer"></div>
+                  <div title="LED" style="position:absolute;left:calc(50% - 4px);top:118px;width:8px;height:8px;border-radius:50%;background:#6b6d72;box-shadow:0 0 0 3px #1a1b1e;pointer-events:none"></div>
+                  <div onClick="{{ m.z3.onClick }}" style="position:absolute;left:-9px;top:118px;width:9px;height:32px;border-radius:5px 0 0 5px;border:2px solid;border-right:none;background:{{ m.z3.fill }};border-color:{{ m.z3.stroke }};cursor:pointer"></div>
+                  <div onClick="{{ m.z4.onClick }}" style="position:absolute;left:-9px;top:156px;width:9px;height:32px;border-radius:5px 0 0 5px;border:2px solid;border-right:none;background:{{ m.z4.fill }};border-color:{{ m.z4.stroke }};cursor:pointer"></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <sc-for list="{{ m.btnList }}" as="b" hint-placeholder-count="7">
+                  <div onClick="{{ b.onClick }}" style="display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid {{ b.bd }};background:{{ b.bg }}" style-hover="background:#222428">
+                    <span style="font-size:14px">{{ b.name }}</span><span style="font-size:13px;color:{{ b.fg }}">{{ b.action }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:17px">{{ m.selName }}</span><span style="font-size:13px;color:#8e8f93">does</span><span style="font-size:15px;color:#f0914e">{{ m.selAction }}</span></div>
+                  <button onClick="{{ m.resetBtn }}" style="height:30px;padding:0 12px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:{{ m.resetFg }};font-size:13px;cursor:pointer">Default</button>
+                </div>
+                <div style="display:flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px;margin-top:16px;width:max-content;max-width:100%;flex-wrap:wrap">
+                  <sc-for list="{{ m.cats }}" as="c" hint-placeholder-count="5"><div onClick="{{ c.onClick }}" style="padding:5px 13px;border-radius:6px;font-size:13px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</div></sc-for>
+                </div>
+                <sc-if value="{{ m.leftOnly }}"><div style="font-size:12.5px;color:#8e8f93;margin-top:10px">The left button only takes clicks, so you can't lose it.</div></sc-if>
+                <div style="display:flex;flex-direction:column;gap:2px;margin-top:12px">
+                  <sc-for list="{{ m.actions }}" as="a" hint-placeholder-count="7">
+                    <div onClick="{{ a.onClick }}" style="display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid {{ a.bd }};background:{{ a.bg }}" style-hover="background:#222428">
+                      <span style="font-size:14px">{{ a.label }}</span><span style="font-size:12px;color:#8e8f93">{{ a.tag }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ m.isKeys }}">
+                  <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid #25272b">
+                    <button onClick="{{ m.record }}" style="height:32px;padding:0 14px;border-radius:7px;background:{{ m.recBg }};border:1px solid #2e3035;color:{{ m.recFg }};font-size:13.5px;cursor:pointer">{{ m.recLabel }}</button>
+                    <span style="font-size:12.5px;color:#8e8f93">{{ m.recHint }}</span>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center">
+                <div><div style="font-size:14px">Click response</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">Debounce for every button. Raise it if a worn switch double-clicks.</div></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div onPointerDown="{{ m.debS.down }}" style="position:relative;height:22px;width:200px;cursor:pointer;touch-action:none">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                    <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ m.debS.pct }}"></div>
+                    <div style="position:absolute;top:2px;left:{{ m.debS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1"></div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;min-width:48px;text-align:right">{{ m.debounce }} ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ mTab.power }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:16px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+                <div style="font-size:13px;color:#8e8f93">Battery</div>
+                <div style="font-size:40px;font-weight:300;margin-top:4px">{{ m.battery }}%</div>
+                <div style="height:6px;border-radius:3px;background:#2e3035;margin-top:10px;overflow:hidden"><div style="height:100%;width:{{ m.batPct }};background:#8cc79b"></div></div>
+                <div style="font-size:12.5px;color:#8e8f93;margin-top:10px">Awake. The receiver reports in steps of 10%.</div>
+              </div>
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+                <div style="font-size:14px">Settings on the mouse</div>
+                <div style="font-size:12.5px;color:#8e8f93;margin-top:6px;line-height:1.5;text-wrap:pretty">The X6 can't report what it holds, so octo hub keeps what it last wrote. If another app changed the mouse, write everything again.</div>
+                <sc-if value="{{ m.notConfirm }}">
+                  <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+                    <button onClick="{{ m.writeAll }}" style="height:32px;padding:0 14px;border-radius:7px;background:#f0914e;border:none;color:#2a1406;font-size:13.5px;cursor:pointer">Write everything</button>
+                    <button onClick="{{ m.askReset }}" style="height:32px;padding:0 14px;border-radius:7px;background:transparent;border:1px solid #6e3a32;color:#f0a596;font-size:13.5px;cursor:pointer">Factory reset…</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ m.confirmReset }}">
+                  <div style="margin-top:14px;padding:12px;border-radius:9px;background:#241a18;border:1px solid #6e3a32">
+                    <div style="font-size:13px">Put every setting back to how the mouse shipped?</div>
+                    <div style="display:flex;gap:8px;margin-top:10px">
+                      <button onClick="{{ m.doReset }}" style="height:30px;padding:0 12px;border-radius:7px;background:#e8685a;border:none;color:#2a0a06;font-size:13px;cursor:pointer">Reset</button>
+                      <button onClick="{{ m.cancelReset }}" style="height:30px;padding:0 12px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">Cancel</button>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:6px 20px">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #25272b">
+                <div><div style="font-size:14px">Sleep after</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">Idle time before the lights and sensor rest.</div></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div onPointerDown="{{ m.sleepS.down }}" style="position:relative;height:22px;width:220px;cursor:pointer;touch-action:none">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                    <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ m.sleepS.pct }}"></div>
+                    <div style="position:absolute;top:2px;left:{{ m.sleepS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1"></div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;min-width:62px;text-align:right">{{ m.sleep }} min</span>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0">
+                <div><div style="font-size:14px">Deep sleep after</div><div style="font-size:12.5px;color:#8e8f93;margin-top:3px">The radio sleeps too. Waking takes a click.</div></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div onPointerDown="{{ m.deepS.down }}" style="position:relative;height:22px;width:220px;cursor:pointer;touch-action:none">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                    <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ m.deepS.pct }}"></div>
+                    <div style="position:absolute;top:2px;left:{{ m.deepS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1"></div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;min-width:62px;text-align:right">{{ m.deep }} min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== KEYBOARD ===== -->
+        <sc-if value="{{ kb.showBoard }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ kTab.keymap }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+              <div style="display:inline-flex;gap:2px;padding:3px;background:#17181b;border:1px solid #26282c;border-radius:9px">
+                <sc-for list="{{ kb.layers }}" as="o" hint-placeholder-count="4"><div onClick="{{ o.onClick }}" style="display:flex;align-items:baseline;gap:6px;padding:6px 13px;border-radius:7px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600">{{ o.n }}</span><span style="font-size:13px">{{ o.label }}</span></div></sc-for>
+              </div>
+              <span style="font-size:12.5px;color:#8e8f93">{{ kb.layerHint }}</span>
+            </div>
+          </sc-if>
+          <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:20px 26px">
+            <div style="position:relative;width:100%;max-width:1100px;margin:0 auto;aspect-ratio:17.75 / 5">
+              <sc-for list="{{ kb.keys }}" as="k" hint-placeholder-count="1">
+                <div onClick="{{ k.onClick }}" style="position:absolute;left:{{ k.left }};top:{{ k.top }};width:{{ k.width }};height:20%;padding:2.5px;cursor:pointer">
+                  <div style="width:100%;height:100%;border-radius:{{ k.radius }};background:{{ k.bg }};color:{{ k.fg }};box-shadow:{{ k.shadow }};display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:4px;font-size:{{ k.fs }};line-height:1.15;text-align:center;transition:background .12s, box-shadow .12s;user-select:none;overflow:hidden">
+                    <span>{{ k.l1 }}</span><sc-if value="{{ k.two }}"><span>{{ k.l2 }}</span></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ kTab.keymap }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;margin-top:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:16px 18px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div style="display:flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px;flex-wrap:wrap">
+                  <sc-for list="{{ kb.cats }}" as="c" hint-placeholder-count="5"><div onClick="{{ c.onClick }}" style="padding:5px 12px;border-radius:6px;font-size:13px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</div></sc-for>
+                </div>
+                <input value="{{ kb.search }}" onChange="{{ kb.onSearch }}" placeholder="Search keycodes" style="height:32px;width:200px;padding:0 11px;border-radius:7px;background:#131416;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;outline:none">
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:14px;max-height:250px;overflow:auto;opacity:{{ kb.pickOpacity }}">
+                <sc-for list="{{ kb.codes }}" as="c" hint-placeholder-count="20">
+                  <div onClick="{{ c.onClick }}" title="{{ c.c }}" style="min-width:44px;height:40px;padding:0 8px 3px;border-radius:6px;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 -3px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:12.5px;cursor:pointer;white-space:nowrap" style-hover="filter:brightness(1.08)">{{ c.l }}</div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #25272b">
+                <input value="{{ kb.free }}" onChange="{{ kb.onFree }}" placeholder="Any QMK keycode, e.g. LT(1,KC_SPC)" style="flex:1;max-width:360px;height:32px;padding:0 11px;border-radius:7px;background:#131416;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;font-family:'JetBrains Mono',monospace;outline:none">
+                <button onClick="{{ kb.applyFree }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">Apply</button>
+              </div>
+            </div>
+
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:16px 18px;min-height:200px">
+              <sc-if value="{{ kb.noSel }}">
+                <div style="height:168px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13.5px;color:#8e8f93;line-height:1.5">Click a key or the knob<br>to change what it does.</div>
+              </sc-if>
+              <sc-if value="{{ kb.hasSel }}">
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="width:60px;height:60px;flex:none;border-radius:{{ kb.selRadius }};background:#f0914e;color:#2a1406;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:14px;text-align:center;padding:0 4px 4px;line-height:1.1">{{ kb.selLabel }}</div>
+                  <div style="min-width:0">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:#f0914e;word-break:break-all">{{ kb.selCode }}</div>
+                    <div style="font-size:13px;color:#8e8f93;margin-top:4px">{{ kb.selDesc }}</div>
+                  </div>
+                </div>
+                <sc-if value="{{ kb.isKnob }}">
+                  <div style="display:flex;flex-direction:column;gap:4px;margin-top:14px">
+                    <sc-for list="{{ kb.encRows }}" as="r" hint-placeholder-count="3">
+                      <div onClick="{{ r.onClick }}" style="display:flex;justify-content:space-between;padding:8px 11px;border-radius:7px;cursor:pointer;border:1px solid {{ r.bd }};background:{{ r.bg }}"><span style="font-size:13.5px">{{ r.label }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8e8f93">{{ r.code }}</span></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div style="display:flex;gap:6px;margin-top:14px">
+                  <button onClick="{{ kb.setTrns }}" style="flex:1;height:32px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">▽ Transparent</button>
+                  <button onClick="{{ kb.setNone }}" style="flex:1;height:32px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">Clear</button>
+                </div>
+                <div style="font-size:12px;color:#8e8f93;margin-top:12px;line-height:1.5">Picking a keycode moves on to the next key. Esc stops.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ kTab.lighting }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:12px">
+              <input value="{{ kl.filter }}" onChange="{{ kl.onFilter }}" placeholder="Filter effects" style="width:100%;height:32px;padding:0 11px;border-radius:7px;background:#131416;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;outline:none">
+              <div style="display:flex;flex-direction:column;gap:1px;margin-top:8px;max-height:300px;overflow:auto">
+                <sc-for list="{{ kl.effects }}" as="e" hint-placeholder-count="10">
+                  <div onClick="{{ e.onClick }}" style="padding:8px 11px;border-radius:7px;font-size:13.5px;cursor:pointer;border:1px solid {{ e.bd }};background:{{ e.bg }};color:{{ e.fg }}" style-hover="background:#222428">{{ e.name }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:18px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13.5px"><span>Brightness</span><span style="font-family:'JetBrains Mono',monospace;color:#8e8f93">{{ kl.brightPct }}</span></div>
+                <div onPointerDown="{{ kl.brightS.down }}" style="position:relative;height:22px;margin-top:8px;cursor:pointer;touch-action:none">
+                  <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                  <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ kl.brightS.pct }}"></div>
+                  <div style="position:absolute;top:2px;left:{{ kl.brightS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1"></div>
+                </div>
+              </div>
+              <sc-if value="{{ kl.showSpeed }}">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13.5px"><span>Effect speed</span><span style="font-family:'JetBrains Mono',monospace;color:#8e8f93">{{ kl.speedPct }}</span></div>
+                  <div onPointerDown="{{ kl.speedS.down }}" style="position:relative;height:22px;margin-top:8px;cursor:pointer;touch-action:none">
+                    <div style="position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:#2e3035"></div>
+                    <div style="position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8c5128;width:{{ kl.speedS.pct }}"></div>
+                    <div style="position:absolute;top:2px;left:{{ kl.speedS.pct }};width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e8e6e1"></div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ kl.isOff }}"><div style="font-size:13px;color:#8e8f93">The lights are off. Pick an effect to turn them on.</div></sc-if>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px;opacity:{{ kl.colourOpacity }}">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13.5px"><span>Colour</span><span style="width:22px;height:22px;border-radius:6px;background:{{ kl.colour }}"></span></div>
+              <div onPointerDown="{{ kl.hueS.down }}" style="position:relative;height:26px;margin-top:12px;cursor:pointer;touch-action:none;border-radius:6px;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)">
+                <div style="position:absolute;top:-3px;left:{{ kl.hueS.pct }};width:12px;height:32px;margin-left:-6px;border-radius:4px;border:2px solid #e8e6e1;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+                <sc-for list="{{ kl.swatches }}" as="w" hint-placeholder-count="8"><div onClick="{{ w.onClick }}" style="width:26px;height:26px;border-radius:7px;background:{{ w.c }};cursor:pointer;box-shadow:{{ w.ring }}"></div></sc-for>
+              </div>
+              <sc-if value="{{ kl.noColour }}"><div style="font-size:12.5px;color:#8e8f93;margin-top:14px">This effect picks its own colours.</div></sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ kTab.macros }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:1px">
+              <sc-for list="{{ km.list }}" as="x" hint-placeholder-count="16">
+                <div onClick="{{ x.onClick }}" style="display:flex;gap:12px;padding:7px 10px;border-radius:7px;cursor:pointer;background:{{ x.bg }}" style-hover="background:#222428">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;width:30px;color:{{ x.nameFg }}">{{ x.name }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:{{ x.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.preview }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:#f0914e">{{ km.name }}</span>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:120px;height:4px;border-radius:2px;background:#2e3035;overflow:hidden"><div style="height:100%;width:{{ km.usePct }};background:#f0914e"></div></div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8e8f93">{{ km.used }} / 3322 bytes</span>
+                  </div>
+                </div>
+                <textarea value="{{ km.text }}" onChange="{{ km.onText }}" spellcheck="false" placeholder="Type text, or add keys below" style="width:100%;height:84px;margin-top:14px;padding:11px 12px;border-radius:9px;background:#131416;border:1px solid #2e3035;color:#e8e6e1;font-family:'JetBrains Mono',monospace;font-size:14px;resize:vertical;outline:none"></textarea>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+                  <span style="font-size:12.5px;color:#8e8f93;align-self:center;margin-right:4px">Add</span>
+                  <sc-for list="{{ km.tokens }}" as="t" hint-placeholder-count="5">
+                    <div onClick="{{ t.onClick }}" title="{{ t.t }}" style="display:flex;gap:7px;align-items:baseline;padding:5px 10px;border-radius:6px;background:#26282c;border:1px solid #2e3035;cursor:pointer" style-hover="border-color:#8c5128"><span style="font-size:12.5px">{{ t.d }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#8e8f93">{{ t.t }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+                <div style="font-size:13.5px;color:#c4c2bc">When you press {{ km.name }}, the keyboard will</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center">
+                  <sc-for list="{{ km.steps }}" as="st" hint-placeholder-count="2">
+                    <div style="display:flex;gap:7px;align-items:baseline;padding:6px 10px;border-radius:7px;background:#352519"><span style="font-size:11.5px;color:#d7a27a">{{ st.kind }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#f3d2b8">{{ st.text }}</span></div>
+                  </sc-for>
+                  <sc-if value="{{ km.empty }}"><span style="font-size:13px;color:#8e8f93">do nothing yet.</span></sc-if>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #25272b">
+                  <button onClick="{{ km.revert }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:{{ km.btnFg }};font-size:13.5px;cursor:pointer">Revert</button>
+                  <button onClick="{{ km.save }}" style="height:32px;padding:0 14px;border-radius:7px;background:{{ km.saveBg }};border:none;color:{{ km.saveFg }};font-size:13.5px;cursor:pointer">Save to keyboard</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ kTab.tester }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:34px;font-weight:300">{{ kt.seen }}</span><span style="font-size:13.5px;color:#8e8f93">of 72 keys work</span></div>
+              <div style="height:6px;border-radius:3px;background:#2e3035;margin-top:12px;overflow:hidden"><div style="height:100%;width:{{ kt.pct }};background:#8cc79b;transition:width .2s"></div></div>
+              <div style="display:flex;gap:16px;align-items:center;margin-top:14px;font-size:12.5px;color:#8e8f93;flex-wrap:wrap">
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#f0914e"></span>held</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#8cc79b"></span>worked</span>
+                <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#e6e2da"></span>not yet</span>
+                <div style="flex:1"></div>
+                <button onClick="{{ kt.reset }}" style="height:30px;padding:0 12px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">Start over</button>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px;min-height:132px">
+              <sc-if value="{{ kt.waiting }}"><div style="font-size:13.5px;color:#8e8f93;line-height:1.5">Press keys on the keyboard. Each switch is read straight from the matrix, so a dead one shows even if the keymap hides it.</div></sc-if>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <sc-for list="{{ kt.events }}" as="e" hint-placeholder-count="0">
+                  <div style="display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px"><span style="color:#8e8f93;width:52px">{{ e.rc }}</span><span style="width:110px">{{ e.key }}</span><span style="color:{{ e.fg }}">{{ e.dir }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ kTab.device }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="font-size:15px;font-weight:500">Windows / Mac layout</div>
+              <sc-if value="{{ kd.managed }}">
+                <div style="display:inline-flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px;margin-top:14px">
+                  <sc-for list="{{ kd.modes }}" as="o" hint-placeholder-count="2"><div onClick="{{ o.onClick }}" style="padding:7px 18px;border-radius:6px;font-size:13.5px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                </div>
+                <div style="font-size:12.5px;color:#8e8f93;margin-top:12px;line-height:1.5">Switching writes the chosen layout into layer 0, so the mode is always what you see here.</div>
+                <div onClick="{{ kd.release }}" style="font-size:12.5px;color:#f0914e;margin-top:10px;cursor:pointer">Give the switch back to the keyboard</div>
+              </sc-if>
+              <sc-if value="{{ kd.unmanaged }}">
+                <div style="font-size:13px;color:#8e8f93;margin-top:8px;line-height:1.5;text-wrap:pretty">The keyboard flips to its Mac layout with Fn+S and back with Fn+A, and it can't tell anyone which one it's in.</div>
+                <button onClick="{{ kd.openDialog }}" style="height:32px;padding:0 14px;border-radius:7px;background:#f0914e;border:none;color:#2a1406;font-size:13.5px;cursor:pointer;margin-top:14px">Let octo hub switch it…</button>
+              </sc-if>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="font-size:15px;font-weight:500">Layout file</div>
+              <div style="font-size:12.5px;color:#8e8f93;margin-top:6px">Same format as VIA, so files move freely between the two.</div>
+              <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+                <button onClick="{{ kd.saveFile }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Save layout file…</button>
+                <button onClick="{{ kd.loadFile }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Load layout file…</button>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="font-size:15px;font-weight:500">Copy a layer</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap;font-size:13.5px">
+                <select value="{{ kd.from }}" onChange="{{ kd.onFrom }}" style="height:32px;padding:0 8px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px"><option value="0">0 Base</option><option value="1">1 Fn</option><option value="2">2 Mac</option><option value="3">3 Mac Fn</option></select>
+                <span style="color:#8e8f93">over</span>
+                <select value="{{ kd.to }}" onChange="{{ kd.onTo }}" style="height:32px;padding:0 8px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px"><option value="0">0 Base</option><option value="1">1 Fn</option><option value="2">2 Mac</option><option value="3">3 Mac Fn</option></select>
+                <button onClick="{{ kd.copy }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Copy</button>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:6px 20px">
+              <sc-for list="{{ kd.info }}" as="r" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #222428;font-size:13px"><span style="color:#8e8f93">{{ r.k }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;word-break:break-all">{{ r.v }}</span></div>
+              </sc-for>
+              <div style="display:flex;gap:8px;padding:14px 0;flex-wrap:wrap">
+                <button onClick="{{ kd.blink }}" style="height:30px;padding:0 12px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;cursor:pointer">Blink lights</button>
+                <button onClick="{{ kd.resetKeys }}" style="height:30px;padding:0 12px;border-radius:7px;background:transparent;border:1px solid #6e3a32;color:#f0a596;font-size:13px;cursor:pointer">Reset keymap…</button>
+                <button onClick="{{ kd.boot }}" style="height:30px;padding:0 12px;border-radius:7px;background:transparent;border:1px solid #6e3a32;color:#f0a596;font-size:13px;cursor:pointer">Bootloader…</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== PEDAL ===== -->
+        <sc-if value="{{ pedalMissing }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;justify-content:center;padding-top:60px">
+            <div style="max-width:420px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;color:#8e8f93">
+              <div style="transform:scale(1.5);margin-bottom:14px;color:#6b6d72"><div style="width:48px;height:48px;position:relative"><div style="position:absolute;left:3px;top:8px;width:42px;height:32px;border:2px solid currentColor;border-radius:6px"></div><div style="position:absolute;left:10px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div><div style="position:absolute;left:28px;top:25px;width:10px;height:10px;border-radius:50%;border:2px solid currentColor"></div></div></div>
+              <div style="font-size:18px;color:#e8e6e1">Tank-G not found</div>
+              <div style="font-size:13.5px;line-height:1.55;text-wrap:pretty">Plug it in over USB. If it's passed through to a virtual machine, give it back to Linux first.</div>
+              <div style="display:flex;gap:8px;margin-top:6px">
+                <button onClick="{{ pedalRetry }}" style="height:32px;padding:0 14px;border-radius:7px;background:#f0914e;border:none;color:#2a1406;font-size:13.5px;cursor:pointer">Try again</button>
+                <button onClick="{{ pedalRetry }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Use a simulated pedal</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pTab.tone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:4px">
+                <button onClick="{{ pp.prev }}" title="Previous preset" style="width:32px;height:32px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:14px;cursor:pointer">‹</button>
+                <div onClick="{{ toPresets }}" title="All presets" style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;color:#f0914e;min-width:72px;text-align:center;cursor:pointer">{{ pp.slot }}</div>
+                <button onClick="{{ pp.next }}" title="Next preset" style="width:32px;height:32px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:14px;cursor:pointer">›</button>
+              </div>
+              <sc-if value="{{ pp.clean }}"><span style="font-size:13px;color:#8e8f93">Saved on the pedal. Turn a knob to hear it change.</span></sc-if>
+              <sc-if value="{{ pp.dirty }}">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <span style="font-size:13px;color:#f0914e;margin-right:4px">● Changed, not saved</span>
+                  <button onClick="{{ pp.save }}" style="height:32px;padding:0 14px;border-radius:7px;background:#f0914e;border:none;color:#2a1406;font-size:13.5px;cursor:pointer">Save to {{ pp.slot }}</button>
+                  <select value="{{ pp.target }}" onChange="{{ pp.onTarget }}" title="Save to another slot" style="height:32px;padding:0 8px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13px;font-family:'JetBrains Mono',monospace">
+                    <sc-for list="{{ pp.slots }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+                  </select>
+                  <button onClick="{{ pp.revert }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Revert</button>
+                </div>
+              </sc-if>
+              <div style="flex:1"></div>
+              <div onClick="{{ pp.toggleBypass }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                <span style="font-size:13.5px">Bypass</span>
+                <div style="width:40px;height:22px;border-radius:11px;background:{{ pp.byp.bg }};position:relative;transition:background .15s"><div style="position:absolute;top:3px;left:{{ pp.byp.x }};width:16px;height:16px;border-radius:50%;background:#e8e6e1;transition:left .15s"></div></div>
+              </div>
+            </div>
+
+            <sc-if value="{{ pp.bypass }}">
+              <div style="font-size:13px;color:#8e8f93;padding:0 4px">Every effect is off and the dry signal passes through. Turn bypass off to hear and edit {{ pp.slot }}.</div>
+            </sc-if>
+
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;opacity:{{ pp.chainOpacity }};pointer-events:{{ pp.chainEvents }}">
+              <sc-for list="{{ pp.blocks }}" as="b" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:10px;flex:{{ b.flex }};min-width:{{ b.minW }}">
+                                    <div style="flex:1;min-width:0;align-self:stretch;background:#1a1b1e;border:1px solid {{ b.bd }};border-radius:12px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                      <span style="font-size:14px;font-weight:500;color:{{ b.nameFg }}">{{ b.name }}</span>
+                      <div onClick="{{ b.sw.onClick }}" style="width:34px;height:20px;border-radius:10px;background:{{ b.sw.bg }};position:relative;cursor:pointer;transition:background .15s"><div style="position:absolute;top:3px;left:{{ b.sw.x }};width:14px;height:14px;border-radius:50%;background:#e8e6e1;transition:left .15s"></div></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:14px;opacity:{{ b.bodyOpacity }}">
+                      <sc-if value="{{ b.hasStep }}">
+                        <div style="display:flex;align-items:center;gap:6px">
+                          <button onClick="{{ b.stepMinus }}" style="width:28px;height:28px;border-radius:6px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;cursor:pointer">−</button>
+                          <span style="flex:1;text-align:center;font-size:13.5px">{{ b.stepText }}</span>
+                          <button onClick="{{ b.stepPlus }}" style="width:28px;height:28px;border-radius:6px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;cursor:pointer">+</button>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ b.hasSeg }}">
+                        <div style="display:flex;gap:2px;padding:3px;background:#131416;border:1px solid #2e3035;border-radius:8px">
+                          <sc-for list="{{ b.seg }}" as="o" hint-placeholder-count="3"><div onClick="{{ o.onClick }}" style="flex:1;min-width:0;text-align:center;padding:5px 4px;border-radius:6px;font-size:12px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div></sc-for>
+                        </div>
+                      </sc-if>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px 4px;justify-content:space-around">
+                        <sc-for list="{{ b.knobs }}" as="k" hint-placeholder-count="2">
+                          <div style="display:flex;flex-direction:column;align-items:center;gap:5px;width:62px">
+                            <div onPointerDown="{{ k.down }}" onDoubleClick="{{ k.reset }}" title="Drag up or down" style="width:50px;height:50px;border-radius:50%;background:{{ k.arc }};position:relative;cursor:ns-resize;touch-action:none">
+                              <div style="position:absolute;inset:4px;border-radius:50%;background:#26282c;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)">
+                                <div style="position:absolute;inset:0;transform:rotate({{ k.rot }})"><div style="position:absolute;left:50%;top:5px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:#e8e6e1"></div></div>
+                              </div>
+                            </div>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:13px">{{ k.val }}</span>
+                            <span style="font-size:12px;color:#8e8f93;margin-top:-3px">{{ k.label }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pTab.presets }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start">
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="font-size:13px;color:#8e8f93;margin-bottom:14px">Click a preset to play it. The footswitches step through the same grid.</div>
+              <div style="display:grid;grid-template-columns:30px repeat(9,minmax(0,1fr));gap:6px;align-items:center">
+                <span></span>
+                <sc-for list="{{ pr.banks }}" as="b" hint-placeholder-count="9"><span style="text-align:center;font-size:12px;color:#8e8f93">{{ b }}</span></sc-for>
+              </div>
+              <sc-for list="{{ pr.rows }}" as="r" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:30px repeat(9,minmax(0,1fr));gap:6px;align-items:center;margin-top:6px">
+                  <span style="font-size:12px;color:#8e8f93">{{ r.letter }}</span>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9">
+                    <div onClick="{{ c.onClick }}" style="height:58px;border-radius:8px;border:1px solid {{ c.bd }};background:{{ c.bg }};padding:7px 8px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between" style-hover="border-color:#4a4c52">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:{{ c.fg }}">{{ c.name }}</span>
+                      <div style="display:flex;gap:3px">
+                        <sc-for list="{{ c.dots }}" as="d" hint-placeholder-count="6"><span style="width:5px;height:5px;border-radius:50%;background:{{ d }}"></span></sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;color:#8e8f93;flex-wrap:wrap">
+                <span>Dots show which blocks are on:</span><span>gate · amp · mod · delay · reverb · cab</span>
+              </div>
+            </div>
+            <div style="background:#1a1b1e;border:1px solid #26282c;border-radius:12px;padding:18px 20px">
+              <div style="font-size:15px;font-weight:500">Backup</div>
+              <div style="font-size:12.5px;color:#8e8f93;margin-top:6px;line-height:1.5">All 36 presets in one file. A copy is also kept before the first save of every session.</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+                <button onClick="{{ pr.backup }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer;text-align:left">Back up all presets…</button>
+                <button onClick="{{ pr.restore }}" style="height:32px;padding:0 14px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer;text-align:left">Restore from a backup…</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- mode takeover dialog -->
+  <sc-if value="{{ kd.dialog }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(10,10,12,.62);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px">
+      <div style="width:100%;max-width:500px;background:#1e2023;border:1px solid #2e3035;border-radius:14px;padding:22px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+        <div style="font-size:17px">Let octo hub switch Windows / Mac?</div>
+        <div style="font-size:13.5px;color:#c4c2bc;line-height:1.55;margin-top:12px;text-wrap:pretty">The keyboard's own switch keys (Fn+S and Fn+A) are turned off so the mode can't change by accident. Both layouts are kept here, and switching writes the one you pick into layer 0.</div>
+        <div style="font-size:13.5px;color:#c4c2bc;line-height:1.55;margin-top:10px;text-wrap:pretty">If it's in Mac mode right now, press Fn+A first.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+          <button onClick="{{ kd.closeDialog }}" style="height:34px;padding:0 16px;border-radius:7px;background:#26282c;border:1px solid #2e3035;color:#e8e6e1;font-size:13.5px;cursor:pointer">Cancel</button>
+          <button onClick="{{ kd.takeOver }}" style="height:34px;padding:0 16px;border-radius:7px;background:#f0914e;border:none;color:#2a1406;font-size:13.5px;cursor:pointer">Take over</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;mouse&quot;,&quot;keyboard&quot;,&quot;pedal&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;homeLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cards&quot;,&quot;rows&quot;],&quot;default&quot;:&quot;cards&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pedalConnected&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const ACC = '#f0914e', ACCD = '#8c5128', TINT = '#2a201a', HI = '#26282c', TXT = '#e8e6e1', SOFT = '#c4c2bc', DIM = '#8e8f93', OK = '#8cc79b';
+const SW = ['#ff3b30', '#ff7a1a', '#ffb01a', '#ffe81a', '#34e05a', '#2fe0e0', '#2f7bff', '#4a3aff', '#e040fb', '#ffffff'];
+const clone = o => JSON.parse(JSON.stringify(o));
+
+// ---------- keyboard layout (GMK70) ----------
+const KEYS = [];
+const add = (y, id, x, w, leg, kind, code) => KEYS.push({ id, x, y, w, leg, kind, code });
+const L = (y, ch, x) => add(y, 'Key' + ch, x, 1, ch, 'alpha', 'KC_' + ch);
+const D = (y, n, sh, x) => add(y, 'Digit' + n, x, 1, sh + '\n' + n, 'alpha', 'KC_' + n);
+add(0, 'knob', 0, 1, 'Mute', 'knob', 'KC_MUTE'); add(0, 'Escape', 1.25, 1, 'Esc', 'alpha', 'KC_ESC');
+[['1', '!'], ['2', '@'], ['3', '#'], ['4', '$'], ['5', '%'], ['6', '^']].forEach(([n, s], i) => D(0, n, s, 2.25 + i));
+[['7', '&'], ['8', '*'], ['9', '('], ['0', ')']].forEach(([n, s], i) => D(0, n, s, 8.75 + i));
+add(0, 'Minus', 12.75, 1, '_\n-', 'alpha', 'KC_MINS'); add(0, 'Equal', 13.75, 1, '+\n=', 'alpha', 'KC_EQL'); add(0, 'Backquote', 14.75, 1, '~\n`', 'alpha', 'KC_GRV'); add(0, 'Backspace', 15.75, 2, 'Backspace', 'mod', 'KC_BSPC');
+add(1, 'm0', 0, 1, 'M0', 'alpha', 'M0'); add(1, 'Tab', 1.25, 1.5, 'Tab', 'mod', 'KC_TAB');
+'QWERT'.split('').forEach((c, i) => L(1, c, 2.75 + i)); 'YUIOP'.split('').forEach((c, i) => L(1, c, 9.25 + i));
+add(1, 'BracketLeft', 14.25, 1, '{\n[', 'alpha', 'KC_LBRC'); add(1, 'BracketRight', 15.25, 1, '}\n]', 'alpha', 'KC_RBRC'); add(1, 'Backslash', 16.25, 1.5, '|\n\\', 'alpha', 'KC_BSLS');
+add(2, 'PageUp', 0, 1, 'PgUp', 'alpha', 'KC_PGUP'); add(2, 'CapsLock', 1.25, 1.75, 'Caps Lock', 'mod', 'KC_CAPS');
+'ASDFG'.split('').forEach((c, i) => L(2, c, 3 + i)); 'HJKL'.split('').forEach((c, i) => L(2, c, 9.5 + i));
+add(2, 'Semicolon', 13.5, 1, ':\n;', 'alpha', 'KC_SCLN'); add(2, 'Quote', 14.5, 1, '"\n\'', 'accent', 'KC_QUOT'); add(2, 'Enter', 15.5, 2.25, 'Enter', 'alpha', 'KC_ENT');
+add(3, 'PageDown', 0, 1, 'PgDn', 'alpha', 'KC_PGDN'); add(3, 'ShiftLeft', 1.25, 2.25, 'Left Shift', 'mod', 'KC_LSFT');
+'ZXCVB'.split('').forEach((c, i) => L(3, c, 3.5 + i)); L(3, 'N', 8.75); L(3, 'M', 9.75);
+add(3, 'Comma', 10.75, 1, '<\n,', 'alpha', 'KC_COMM'); add(3, 'Period', 11.75, 1, '>\n.', 'alpha', 'KC_DOT'); add(3, 'Slash', 12.75, 1, '?\n/', 'alpha', 'KC_SLSH');
+add(3, 'ShiftRight', 13.75, 1, 'RShft', 'mod', 'KC_RSFT'); add(3, 'ArrowUp', 14.75, 1, '↑', 'alpha', 'KC_UP'); add(3, 'Delete', 15.75, 1, 'Del', 'alpha', 'KC_DEL'); add(3, 'trns', 16.75, 1, '▽', 'alpha', 'KC_TRNS');
+add(4, 'mo1a', 0, 1, 'MO(1)', 'mod', 'MO(1)'); add(4, 'ControlLeft', 1.25, 1.25, 'LCtl', 'mod', 'KC_LCTL'); add(4, 'MetaLeft', 2.5, 1.25, 'LWin', 'mod', 'KC_LGUI'); add(4, 'AltLeft', 3.75, 1.25, 'LAlt', 'mod', 'KC_LALT'); add(4, 'Space', 5.25, 3, 'Space', 'mod', 'KC_SPC');
+add(4, 'space2', 9, 2.75, 'Space\nFn1', 'alpha', 'LT(1,KC_SPC)'); add(4, 'AltRight', 11.75, 1.25, 'RAlt', 'mod', 'KC_RALT'); add(4, 'mo1b', 13, 1.25, 'MO(1)', 'mod', 'MO(1)');
+add(4, 'ArrowLeft', 14.75, 1, '←', 'mod', 'KC_LEFT'); add(4, 'ArrowDown', 15.75, 1, '↓', 'mod', 'KC_DOWN'); add(4, 'ArrowRight', 16.75, 1, '→', 'alpha', 'KC_RGHT');
+const ROWCOL = {}; { const cnt = {}; KEYS.forEach(k => { cnt[k.y] = (cnt[k.y] || 0); ROWCOL[k.id] = `[${k.y},${cnt[k.y]++}]`; }); }
+
+const FN = { Digit1: 'F1', Digit2: 'F2', Digit3: 'F3', Digit4: 'F4', Digit5: 'F5', Digit6: 'F6', Digit7: 'F7', Digit8: 'F8', Digit9: 'F9', Digit0: 'F10', Minus: 'F11', Equal: 'F12' };
+const FNX = { Backspace: ['Del', 'KC_DEL'], ArrowUp: ['Vol +', 'KC_VOLU'], ArrowDown: ['Vol −', 'KC_VOLD'], ArrowLeft: ['Prev', 'KC_MPRV'], ArrowRight: ['Next', 'KC_MNXT'], Delete: ['Play', 'KC_MPLY'], PageUp: ['Home', 'KC_HOME'], PageDown: ['End', 'KC_END'], KeyW: ['Bright +', 'RGB_VAI'], KeyX: ['Bright −', 'RGB_VAD'], KeyE: ['RGB Mode', 'RGB_MOD'], KeyR: ['RGB On', 'RGB_TOG'], Escape: ['`', 'KC_GRV'] };
+
+// ---------- keycodes ----------
+const kc = (l, c, d) => ({ l, c, d: d || '' });
+const CODES = {
+  Basic: [
+    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => kc(c, 'KC_' + c, 'Letter ' + c)),
+    ...'1234567890'.split('').map(c => kc(c, 'KC_' + c, 'Number ' + c)),
+    kc('Esc', 'KC_ESC', 'Escape'), kc('Enter', 'KC_ENT', 'Enter'), kc('Backspace', 'KC_BSPC', 'Backspace'), kc('Tab', 'KC_TAB', 'Tab'), kc('Space', 'KC_SPC', 'Space'),
+    kc('-', 'KC_MINS', 'Minus'), kc('=', 'KC_EQL', 'Equals'), kc('[', 'KC_LBRC', 'Left bracket'), kc(']', 'KC_RBRC', 'Right bracket'), kc('\\', 'KC_BSLS', 'Backslash'), kc(';', 'KC_SCLN', 'Semicolon'), kc("'", 'KC_QUOT', 'Quote'), kc('`', 'KC_GRV', 'Grave'), kc(',', 'KC_COMM', 'Comma'), kc('.', 'KC_DOT', 'Period'), kc('/', 'KC_SLSH', 'Slash'),
+    kc('Caps Lock', 'KC_CAPS', 'Caps Lock'), ...Array.from({ length: 12 }, (_, i) => kc('F' + (i + 1), 'KC_F' + (i + 1), 'Function ' + (i + 1))),
+    kc('Print Screen', 'KC_PSCR', 'Print Screen'), kc('Insert', 'KC_INS', 'Insert'), kc('Del', 'KC_DEL', 'Delete'), kc('Home', 'KC_HOME', 'Home'), kc('End', 'KC_END', 'End'), kc('PgUp', 'KC_PGUP', 'Page Up'), kc('PgDn', 'KC_PGDN', 'Page Down'),
+    kc('↑', 'KC_UP', 'Up'), kc('↓', 'KC_DOWN', 'Down'), kc('←', 'KC_LEFT', 'Left'), kc('→', 'KC_RGHT', 'Right'),
+    kc('LCtl', 'KC_LCTL', 'Left Control'), kc('LShft', 'KC_LSFT', 'Left Shift'), kc('LAlt', 'KC_LALT', 'Left Alt'), kc('LWin', 'KC_LGUI', 'Left Super'), kc('RCtl', 'KC_RCTL', 'Right Control'), kc('RShft', 'KC_RSFT', 'Right Shift'), kc('RAlt', 'KC_RALT', 'Right Alt'),
+  ],
+  Media: [kc('Mute', 'KC_MUTE', 'Mute audio'), kc('Vol +', 'KC_VOLU', 'Volume up'), kc('Vol −', 'KC_VOLD', 'Volume down'), kc('Play', 'KC_MPLY', 'Play / pause'), kc('Next', 'KC_MNXT', 'Next track'), kc('Prev', 'KC_MPRV', 'Previous track'), kc('Stop', 'KC_MSTP', 'Stop'), kc('Bright +', 'KC_BRIU', 'Screen brighter'), kc('Bright −', 'KC_BRID', 'Screen dimmer'), kc('Calc', 'KC_CALC', 'Calculator'), kc('Mail', 'KC_MAIL', 'Mail'), kc('Files', 'KC_MYCM', 'File manager')],
+  Layers: [kc('▽', 'KC_TRNS', 'Transparent: uses the key below'), kc('', 'KC_NO', 'Does nothing'), ...[1, 2, 3].map(n => kc('MO(' + n + ')', 'MO(' + n + ')', 'Layer ' + n + ' while held')), ...[0, 1, 2, 3].map(n => kc('TO(' + n + ')', 'TO(' + n + ')', 'Switch to layer ' + n)), ...[1, 2, 3].map(n => kc('TG(' + n + ')', 'TG(' + n + ')', 'Toggle layer ' + n))],
+  Macro: Array.from({ length: 16 }, (_, i) => kc('M' + i, 'M' + i, 'Runs macro M' + i)),
+  Lighting: [kc('RGB On', 'RGB_TOG', 'Lights on / off'), kc('RGB Mode', 'RGB_MOD', 'Next effect'), kc('Hue +', 'RGB_HUI', 'Hue up'), kc('Hue −', 'RGB_HUD', 'Hue down'), kc('Bright +', 'RGB_VAI', 'Brighter'), kc('Bright −', 'RGB_VAD', 'Dimmer'), kc('Speed +', 'RGB_SPI', 'Faster'), kc('Speed −', 'RGB_SPD', 'Slower')],
+};
+const ALLCODES = Object.values(CODES).flat();
+const descOf = code => (ALLCODES.find(c => c.c === code) || {}).d || (code === 'LT(1,KC_SPC)' ? 'Space when tapped, layer 1 when held' : '');
+
+const KFX = [['All Off', 'Basic'], ['Solid Color', 'Basic'], ['Alphas Mods', 'Basic'], ['Breathing', 'Basic'], ['Gradient Up Down', 'Gradient'], ['Gradient Left Right', 'Gradient'], ['Band Sat', 'Gradient'], ['Cycle All', 'Cycle'], ['Cycle Left Right', 'Cycle'], ['Rainbow Moving Chevron', 'Cycle'], ['Cycle Pinwheel', 'Cycle'], ['Raindrops', 'Reactive'], ['Typing Heatmap', 'Reactive'], ['Solid Reactive', 'Reactive'], ['Splash', 'Reactive']];
+const KFX_COLOUR = ['Solid Color', 'Alphas Mods', 'Breathing', 'Gradient Up Down', 'Gradient Left Right', 'Band Sat', 'Solid Reactive', 'Splash'];
+const KFX_STATIC = ['All Off', 'Solid Color', 'Alphas Mods', 'Gradient Up Down', 'Gradient Left Right', 'Band Sat'];
+
+function parseMacro(t) {
+  const out = []; let i = 0, buf = '';
+  const flush = () => { if (buf) { out.push({ kind: 'type', text: buf }); buf = ''; } };
+  while (i < t.length) {
+    const ch = t[i];
+    if (ch === '\\' && i + 1 < t.length) { buf += t[i + 1]; i += 2; continue; }
+    if (ch === '{') {
+      const j = t.indexOf('}', i); if (j < 0) { buf += t.slice(i); break; }
+      flush(); const inner = t.slice(i + 1, j).trim();
+      if (/^\d+$/.test(inner)) out.push({ kind: 'wait', text: inner + ' ms' });
+      else if (inner[0] === '+') out.push({ kind: 'hold', text: inner.slice(1) });
+      else if (inner[0] === '-') out.push({ kind: 'release', text: inner.slice(1) });
+      else if (inner.includes(',')) out.push({ kind: 'press together', text: inner.split(',').map(s => s.trim()).join(' + ') });
+      else if (inner) out.push({ kind: 'tap', text: inner });
+      i = j + 1; continue;
+    }
+    buf += ch; i++;
+  }
+  flush(); return out;
+}
+const macroBytes = t => parseMacro(t).reduce((n, s) => n + (s.kind === 'type' ? s.text.length : s.kind === 'press together' ? s.text.split('+').length * 3 : s.kind === 'wait' ? 5 : 3), 0) + 1;
+
+// ---------- mouse ----------
+const BTN = [['left', 'Left'], ['right', 'Right'], ['wheel', 'Wheel'], ['forward', 'Forward'], ['back', 'Back'], ['dpiUp', 'DPI +'], ['dpiDown', 'DPI −']];
+const BTN_DEF = { left: 'Left click', right: 'Right click', wheel: 'Middle click', forward: 'Forward', back: 'Back', dpiUp: 'DPI +', dpiDown: 'DPI −' };
+const ACTIONS = { Mouse: ['Left click', 'Right click', 'Middle click', 'Back', 'Forward', 'Double click', 'Fire (rapid click)'], DPI: ['DPI +', 'DPI −', 'DPI cycle'], Media: ['Play / pause', 'Next track', 'Previous track', 'Volume +', 'Volume −', 'Mute'], Keys: ['Ctrl+C', 'Ctrl+V', 'Ctrl+Z', 'Alt+Tab', 'Super'], Off: ['Disabled'] };
+const catOf = a => Object.keys(ACTIONS).find(c => ACTIONS[c].includes(a)) || 'Keys';
+const MFX = [['dpi', 'DPI colour', 'stage colour'], ['dpib', 'DPI breathing', 'stage colour'], ['steady', 'Steady', 'one colour'], ['breath', 'Breathing', 'one colour'], ['neon', 'Neon', 'cycles colours'], ['cbreath', 'Colour breathing', 'cycles colours'], ['off', 'Off', '']];
+const M_DEFAULT = () => ({
+  stages: [{ dpi: 800, c: '#ff3b30' }, { dpi: 1200, c: '#34e05a' }, { dpi: 1600, c: '#2f7bff' }, { dpi: 3200, c: '#ffe81a' }, { dpi: 5600, c: '#2fe0e0' }, { dpi: 26000, c: '#e040fb' }],
+  active: 1, polling: 1000, lift: 2, snap: false, ripple: true, effect: 'dpi', lightColor: '#ff7a1a', speed: 3,
+  binds: { ...BTN_DEF }, btnSel: 'left', btnCat: 'Mouse', recording: false, debounce: 4, sleep: 0.5, deep: 10, battery: 70, confirmReset: false,
+});
+
+// X6 shell seen from above, same geometry as remora's art.rs
+const MW = 168, MH = MW / 0.58;
+const hw = v => { v = Math.min(1, Math.max(0, v)); return 0.5 * Math.pow(Math.max(0, Math.sin(Math.PI * v)), 0.42) * (0.84 + 0.16 * v); };
+const at = (x, v) => [(x * MW).toFixed(1), (v * MH).toFixed(1)];
+const poly = pts => 'M' + pts.map(p => p.join(',')).join('L') + 'Z';
+const MOUSE = (() => {
+  const n = 48, out = [];
+  for (let i = 0; i <= n; i++) out.push(at(hw(i / n), i / n));
+  for (let i = n - 1; i >= 1; i--) out.push(at(-hw(i / n), i / n));
+  const split = 0.42, gap = 0.085;
+  const main = side => { const p = [at(side * gap, 0.035)]; for (let i = 0; i <= 20; i++) { const v = 0.035 + (split - 0.035) * i / 20; p.push(at(side * hw(v) * 0.985, v)); } p.push(at(side * gap, split - 0.012)); return p; };
+  const rect = (x0, v0, x1, v1) => [at(x0, v0), at(x1, v0), at(x1, v1), at(x0, v1)];
+  const flank = (v0, v1) => { const p = []; for (let i = 0; i <= 8; i++) { const v = v0 + (v1 - v0) * i / 8; p.push(at(-hw(v) - 0.015, v)); } for (let i = 8; i >= 0; i--) { const v = v0 + (v1 - v0) * i / 8; p.push(at(-hw(v) + 0.055, v)); } return p; };
+  const btns = [main(-1), main(1), rect(-0.05, 0.11, 0.05, 0.25), flank(0.39, 0.49), flank(0.505, 0.605), rect(-0.045, 0.285, 0.045, 0.335), rect(-0.045, 0.345, 0.045, 0.395)].map(poly);
+  let ridges = ''; for (let k = 1; k < 6; k++) { const y = (0.11 + 0.14 * k / 6) * MH; ridges += `M${(-0.05 * MW + 3).toFixed(1)},${y.toFixed(1)}L${(0.05 * MW - 3).toFixed(1)},${y.toFixed(1)}`; }
+  const pad = 16;
+  return { outline: poly(out), btns, ridges, logoY: (0.72 * MH).toFixed(1), logoR: (MW * 0.07).toFixed(1), vb: `${-MW / 2 - pad} ${-pad} ${MW + pad * 2} ${MH + pad * 2}`, pw: (MW + pad * 2) + 'px', ph: (MH + pad * 2).toFixed(0) + 'px' };
+})();
+const MS = { outline: MOUSE.outline, ridges: MOUSE.ridges, logoY: MOUSE.logoY, logoR: MOUSE.logoR, vb: MOUSE.vb, pw: MOUSE.pw, ph: MOUSE.ph, ...Object.fromEntries(MOUSE.btns.map((d, i) => ['b' + i, d])) };
+const BTN_IDX = ['left', 'right', 'wheel', 'forward', 'back', 'dpiUp', 'dpiDown'];
+
+// ---------- pedal ----------
+const BLOCKS = [
+  { k: 'gate', n: 'Gate', knobs: [['th', 'Threshold', 1, 100]] },
+  { k: 'amp', n: 'Amp', step: ['type', 1, 9, 'Model '], knobs: [['gain', 'Gain', 0, 127], ['treble', 'Treble', 0, 127], ['middle', 'Middle', 0, 127], ['bass', 'Bass', 0, 127], ['volume', 'Volume', 0, 127]] },
+  { k: 'mod', n: 'Mod', seg: ['fx', ['Chorus', 'Phaser', 'Tremolo']], knobs: [['speed', 'Speed', 0, 100]] },
+  { k: 'dly', n: 'Delay', knobs: [['mix', 'Mix', 1, 100], ['time', 'Time', 0, 100]] },
+  { k: 'rev', n: 'Reverb', knobs: [['decay', 'Decay', 1, 100], ['mix', 'Mix', 0, 100]] },
+  { k: 'cab', n: 'Cab', step: ['ir', 1, 8, 'IR slot '], knobs: [] },
+];
+function genPreset(i) {
+  const h = n => ((i * 37 + n * 53) % 101) / 100, r = (a, b, n) => Math.round(a + h(n) * (b - a));
+  return { gate: { on: i % 3 !== 2, th: r(10, 50, 1) }, amp: { on: true, type: 1 + (i % 9), gain: r(20, 110, 2), treble: r(40, 100, 3), middle: r(40, 90, 4), bass: r(40, 90, 5), volume: r(60, 100, 6) }, mod: { on: i % 4 === 1, fx: 1 + (i % 3), speed: r(0, 100, 7) }, dly: { on: i % 2 === 0, mix: r(10, 50, 8), time: r(20, 80, 9) }, rev: { on: i % 3 !== 1, decay: r(20, 80, 10), mix: r(10, 50, 11) }, cab: { on: true, ir: 1 + (i % 8) } };
+}
+const slotName = i => `${Math.floor(i / 4) + 1}${'ABCD'[i % 4]}`;
+
+class Component extends DCLogic {
+  state = (() => {
+    const presets = Array.from({ length: 36 }, (_, i) => genPreset(i));
+    const st = this.props.startScreen;
+    return {
+      screen: st && st !== 'home' ? st : 'home', menuOpen: false, saved: null, pedalForced: false,
+      tabs: { mouse: 'dpi', keyboard: 'keymap', pedal: 'tone' },
+      m: M_DEFAULT(),
+      k: {
+        layer: 0, sel: null, cat: 'Basic', search: '', free: '', map: {}, managed: false, mode: 'Windows', dialog: false, from: '0', to: '1',
+        enc: { press: { l: 'Mute', c: 'KC_MUTE' }, left: { l: 'Vol −', c: 'KC_VOLD' }, right: { l: 'Vol +', c: 'KC_VOLU' } }, encSlot: 'press',
+        effect: 'Gradient Left Right', bright: 180, speed: 90, hue: 20, fxFilter: '',
+        macros: ['{KC_LCTL,KC_C}', 'git status{KC_ENT}', ...Array(14).fill('')], macrosSaved: null, macroSel: 0,
+        seen: {}, held: {}, events: [],
+      },
+      p: { presets, sounding: 0, live: clone(presets[0]), bypass: false, target: '1' },
+    };
+  })();
+
+  componentDidMount() {
+    this.setState(s => ({ k: { ...s.k, macrosSaved: [...s.k.macros] } }));
+    this._kd = e => this.onKey(e, true); this._ku = e => this.onKey(e, false);
+    window.addEventListener('keydown', this._kd); window.addEventListener('keyup', this._ku);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._kd); window.removeEventListener('keyup', this._ku); clearTimeout(this._t); }
+  componentDidUpdate(pp) { if (pp.startScreen !== this.props.startScreen && this.props.startScreen) this.setState({ screen: this.props.startScreen, menuOpen: false }); }
+
+  onKey(e, down) {
+    const s = this.state;
+    if (s.screen === 'mouse' && s.m.recording && down) {
+      if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
+      e.preventDefault();
+      const combo = [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Super', e.key.length === 1 ? e.key.toUpperCase() : e.key].filter(Boolean).join('+');
+      this.setM(m => ({ recording: false, binds: { ...m.binds, [m.btnSel]: combo } }));
+      return;
+    }
+    if (s.screen !== 'keyboard') return;
+    const tab = s.tabs.keyboard;
+    if (tab === 'tester') {
+      const key = KEYS.find(k => k.id === e.code); if (!key) return;
+      e.preventDefault(); if (down && e.repeat) return; this.press(key, down);
+    } else if (tab === 'keymap' && down && e.key === 'Escape') this.setK({ sel: null });
+  }
+  press(key, down) {
+    this.setState(s => {
+      const k = s.k;
+      const ev = { rc: ROWCOL[key.id], key: key.leg.split('\n').pop(), dir: down ? 'down' : 'up', fg: down ? ACC : DIM };
+      return { k: { ...k, held: { ...k.held, [key.id]: down }, seen: { ...k.seen, [key.id]: true }, events: [ev, ...k.events].slice(0, 9) } };
+    });
+  }
+
+  flash(text) { this.setState({ saved: text }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ saved: null }), 1800); }
+  setM(patch, save = true) { this.setState(s => ({ m: { ...s.m, ...(typeof patch === 'function' ? patch(s.m) : patch) } })); if (save) this.flash('Saved to the mouse'); }
+  setK(patch, save) { this.setState(s => ({ k: { ...s.k, ...(typeof patch === 'function' ? patch(s.k) : patch) } })); if (save) this.flash(save); }
+  setP(patch) { this.setState(s => ({ p: { ...s.p, ...(typeof patch === 'function' ? patch(s.p) : patch) } })); }
+  setStage(i, patch) { this.setM(m => ({ stages: m.stages.map((st, j) => j === i ? { ...st, ...patch } : st) })); }
+  setLive(block, patch) { this.setP(p => ({ live: { ...p.live, [block]: { ...p.live[block], ...patch } } })); }
+  loadSlot(i) { this.setP(p => ({ sounding: i, live: clone(p.presets[i]), bypass: false })); }
+  go(screen) { this.setState({ screen, menuOpen: false }); }
+  tab(dev, t) { this.setState(s => ({ tabs: { ...s.tabs, [dev]: t } })); }
+
+  slider(val, min, max, set, log) {
+    const toP = v => log ? Math.log(v / min) / Math.log(max / min) : (v - min) / (max - min);
+    const fromP = p => log ? min * Math.pow(max / min, p) : min + p * (max - min);
+    return {
+      pct: (Math.max(0, Math.min(1, toP(val))) * 100).toFixed(2) + '%',
+      down: e => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const go = ev => set(fromP(Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width))));
+        go(e);
+        const up = () => { window.removeEventListener('pointermove', go); window.removeEventListener('pointerup', up); };
+        window.addEventListener('pointermove', go); window.addEventListener('pointerup', up);
+      },
+    };
+  }
+  knobDown(get, set, min, max) {
+    return e => {
+      e.preventDefault(); const y0 = e.clientY, v0 = get();
+      const mv = ev => set(Math.round(Math.min(max, Math.max(min, v0 + (y0 - ev.clientY) / 160 * (max - min)))));
+      const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+    };
+  }
+  seg(opts, cur, pick, fmt) { return opts.map(o => ({ label: fmt ? fmt(o) : o, bg: o === cur ? ACC : 'transparent', fg: o === cur ? '#2a1406' : SOFT, onClick: () => pick(o) })); }
+  sw(on, onClick) { return { bg: on ? ACC : '#3a3c42', x: on ? '21px' : '3px', onClick }; }
+  swSmall(on, onClick) { return { bg: on ? ACC : '#3a3c42', x: on ? '17px' : '3px', onClick }; }
+
+  kbAssign(layer, key) {
+    const k = this.state.k;
+    if (key.id === 'knob') return k.enc.press;
+    const o = k.map[layer + ':' + key.id]; if (o) return o;
+    if (layer === 0) return { l: key.leg, c: key.code };
+    if (layer === 2) {
+      if (key.id === 'MetaLeft') return { l: 'LOpt', c: 'KC_LALT' };
+      if (key.id === 'AltLeft') return { l: 'LCmd', c: 'KC_LGUI' };
+      return { l: key.leg, c: key.code };
+    }
+    if (FN[key.id]) return { l: FN[key.id], c: 'KC_' + FN[key.id] };
+    if (FNX[key.id]) return { l: FNX[key.id][0], c: FNX[key.id][1] };
+    if (!k.managed && layer === 1 && key.id === 'KeyS') return { l: 'TO(2)', c: 'TO(2)' };
+    if (!k.managed && layer === 3 && key.id === 'KeyA') return { l: 'TO(0)', c: 'TO(0)' };
+    return { l: '▽', c: 'KC_TRNS' };
+  }
+  assign(code) {
+    const k = this.state.k; if (!k.sel) return;
+    if (k.sel === 'knob') { const order = ['press', 'left', 'right']; const next = order[(order.indexOf(k.encSlot) + 1) % 3]; this.setK(k => ({ enc: { ...k.enc, [k.encSlot]: { l: code.l, c: code.c } }, encSlot: next }), 'Written to the keyboard'); return; }
+    const i = KEYS.findIndex(x => x.id === k.sel);
+    let n = i + 1; if (n >= KEYS.length) n = 1; if (KEYS[n].id === 'knob') n++;
+    this.setK(k => ({ map: { ...k.map, [k.layer + ':' + k.sel]: { l: code.l, c: code.c } }, sel: KEYS[n].id }), 'Written to the keyboard');
+  }
+
+  renderVals() {
+    const s = this.state, P = this.props, m = s.m, k = s.k, p = s.p;
+    const pedalOn = (P.pedalConnected ?? true) || s.pedalForced;
+    const layout = P.homeLayout ?? 'cards';
+    const act = m.stages[m.active];
+
+    // ---- devices ----
+    const devices = [
+      { id: 'mouse', name: 'Attack Shark X6', kind: 'Mouse', isMouse: true, connected: true, conn: 'Connected · 2.4 GHz receiver', connShort: 'Wireless', hasDot: true, headDot: act.c, head: act.dpi, headUnit: 'DPI', hasBattery: true, bat: m.battery + '%', batText: m.battery + '%', menuSub: `${act.dpi} DPI · ${m.battery}% battery` },
+      { id: 'keyboard', name: 'ZUOYA GMK70', kind: 'Keyboard', isKb: true, connected: true, conn: 'Connected · USB', connShort: 'USB', hasDot: false, head: k.mode, headUnit: 'layout', hasBattery: false, menuSub: `${k.mode} layout` },
+      pedalOn
+        ? { id: 'pedal', name: 'M-Vave Tank-G', kind: 'Guitar pedal', isPedal: true, connected: true, conn: 'Connected · USB MIDI', connShort: 'USB MIDI', hasDot: false, head: slotName(p.sounding), headUnit: p.bypass ? 'bypassed' : 'preset', hasBattery: false, menuSub: `Preset ${slotName(p.sounding)}` }
+        : { id: 'pedal', name: 'M-Vave Tank-G', kind: 'Guitar pedal', isPedal: true, connected: false, conn: 'Not found. Plug it in over USB', connShort: 'Not found', hasDot: false, head: 'Not connected', headUnit: '', hasBattery: false, menuSub: 'Not connected' },
+    ].map((d, i) => ({
+      ...d, isMouse: !!d.isMouse, isKb: !!d.isKb, isPedal: !!d.isPedal,
+      headFont: d.connected ? "'JetBrains Mono',monospace" : 'Ubuntu,sans-serif', headWeight: d.connected ? 600 : 300,
+      connColor: d.connected ? OK : '#55575c', opacity: d.connected ? 1 : 0.6, rowLine: i ? '#232529' : 'transparent',
+      menuBg: s.screen === d.id ? '#26282c' : 'transparent', open: () => this.go(d.id),
+    }));
+    const cur = devices.find(d => d.id === s.screen) || devices[0];
+    const TABS = { mouse: [['dpi', 'DPI & sensor'], ['lighting', 'Lighting'], ['buttons', 'Buttons'], ['power', 'Power']], keyboard: [['keymap', 'Keymap'], ['lighting', 'Lighting'], ['macros', 'Macros'], ['tester', 'Key tester'], ['device', 'Device']], pedal: pedalOn ? [['tone', 'Tone'], ['presets', 'Presets']] : [] };
+    const curTab = s.tabs[s.screen];
+    const tabs = (TABS[s.screen] || []).map(([id, label]) => ({ label, bg: curTab === id ? '#2a2c31' : 'transparent', fg: curTab === id ? TXT : DIM, onClick: () => this.tab(s.screen, id) }));
+    const isMouse = s.screen === 'mouse', isKb = s.screen === 'keyboard', isPedal = s.screen === 'pedal';
+    const on = (dev, t) => s.screen === dev && curTab === t;
+
+    // ---- mouse ----
+    const stages = m.stages.map((st, i) => ({ n: i + 1, dpi: st.dpi, c: st.c, tag: i === m.active ? 'in use' : '', bd: i === m.active ? ACC : '#2e3035', bg: i === m.active ? TINT : '#1e2023', pick: () => this.setM({ active: i }) }));
+    const glowC = { dpi: act.c, dpib: act.c, steady: m.lightColor, breath: m.lightColor, neon: '#ff3b30', cbreath: '#ff3b30', off: 'transparent' }[m.effect];
+    const dur = [6, 4.5, 3, 2, 1.2][m.speed - 1] + 's';
+    const anim = { dpib: `oh-breathe ${dur} ease-in-out infinite`, breath: `oh-breathe ${dur} ease-in-out infinite`, neon: `oh-hue ${dur} linear infinite`, cbreath: `oh-hue-breathe ${dur} ease-in-out infinite` }[m.effect] || 'none';
+    const h = React.createElement;
+    const glow = m.effect === 'off' ? null : h('div', { key: m.effect + m.speed + glowC, style: { position: 'absolute', left: 'calc(50% - 4px)', top: 110, width: 8, height: 8, borderRadius: '50%', background: glowC, boxShadow: `0 0 6px 1px ${glowC}, 0 0 16px 4px ${glowC}55`, pointerEvents: 'none', animation: anim } });
+    const selB = m.btnSel, curAct = m.binds[selB];
+    const zone = id => ({ fill: selB === id ? (['left', 'right'].includes(id) ? 'rgba(240,145,78,.18)' : ACC) : (['left', 'right'].includes(id) ? 'transparent' : '#131416'), stroke: selB === id ? ACC : '#55585e', onClick: () => this.setM(mm => ({ btnSel: id, btnCat: catOf(mm.binds[id]), recording: false }), false) });
+    const catsAvail = selB === 'left' ? ['Mouse'] : Object.keys(ACTIONS);
+    const actList = selB === 'left' ? ACTIONS.Mouse.filter(a => a.includes('click') && a !== 'Middle click' || a === 'Double click') : ACTIONS[m.btnCat];
+    const mouse = {
+      stages, stageCount: m.stages.length, editN: m.active + 1, editDpi: act.dpi,
+      stageMinus: () => m.stages.length > 1 && this.setM(mm => ({ stages: mm.stages.slice(0, -1), active: Math.min(mm.active, mm.stages.length - 2) })),
+      stagePlus: () => m.stages.length < 8 && this.setM(mm => ({ stages: [...mm.stages, { dpi: Math.min(26000, mm.stages[mm.stages.length - 1].dpi + 800), c: SW[mm.stages.length % SW.length] }] })),
+      dpiS: this.slider(act.dpi, 50, 26000, v => this.setStage(m.active, { dpi: Math.round(v / 50) * 50 }), true),
+      dpiPresets: [400, 800, 1200, 1600, 2400, 3200, 6400, 12800].map(v => ({ label: v, bg: act.dpi === v ? ACCD : HI, fg: act.dpi === v ? TXT : SOFT, onClick: () => this.setStage(m.active, { dpi: v }) })),
+      swatches: SW.map(c => ({ c, ring: act.c === c ? '0 0 0 2px #1a1b1e, 0 0 0 4px #e8e6e1' : 'inset 0 0 0 1px rgba(0,0,0,.2)', onClick: () => this.setStage(m.active, { c }) })),
+      polling: this.seg([125, 250, 500, 1000], m.polling, v => this.setM({ polling: v }), v => v + ' Hz'),
+      lift: this.seg([1, 2], m.lift, v => this.setM({ lift: v }), v => v + ' mm'),
+      snap: this.sw(m.snap, () => this.setM({ snap: !m.snap })), ripple: this.sw(m.ripple, () => this.setM({ ripple: !m.ripple })),
+      effects: MFX.map(([id, name, note]) => ({ name, note, bd: m.effect === id ? ACC : 'transparent', bg: m.effect === id ? TINT : 'transparent', fg: m.effect === id ? ACC : TXT, onClick: () => this.setM({ effect: id }) })),
+      glow, logoC: m.effect === 'off' ? '#26282c' : glowC, logoO: 1,
+      showColour: ['steady', 'breath'].includes(m.effect), showDpiNote: ['dpi', 'dpib'].includes(m.effect), showSpeed: ['dpib', 'breath', 'neon', 'cbreath'].includes(m.effect),
+      lightSwatches: SW.map(c => ({ c, ring: m.lightColor === c ? '0 0 0 2px #1a1b1e, 0 0 0 4px #e8e6e1' : 'none', onClick: () => this.setM({ lightColor: c }) })),
+      speeds: this.seg([1, 2, 3, 4, 5], m.speed, v => this.setM({ speed: v })),
+      ...Object.fromEntries(BTN_IDX.map((id, i) => ['z' + i, zone(id)])),
+      btnList: BTN.map(([id, name]) => ({ name, action: m.binds[id], bd: selB === id ? ACC : 'transparent', bg: selB === id ? TINT : 'transparent', fg: selB === id ? ACC : (m.binds[id] === BTN_DEF[id] ? DIM : SOFT), onClick: zone(id).onClick })),
+      selName: (BTN.find(b => b[0] === selB) || [])[1], selAction: curAct,
+      resetBtn: () => this.setM(mm => ({ binds: { ...mm.binds, [selB]: BTN_DEF[selB] }, btnCat: catOf(BTN_DEF[selB]) })), resetFg: curAct === BTN_DEF[selB] ? '#55575c' : TXT,
+      cats: catsAvail.map(c => ({ label: c, bg: m.btnCat === c ? ACC : 'transparent', fg: m.btnCat === c ? '#2a1406' : SOFT, onClick: () => this.setM({ btnCat: c, recording: false }, false) })),
+      leftOnly: selB === 'left',
+      actions: actList.map(a => ({ label: a, tag: a === BTN_DEF[selB] ? 'default' : '', bd: a === curAct ? ACC : 'transparent', bg: a === curAct ? TINT : 'transparent', onClick: () => this.setM(mm => ({ binds: { ...mm.binds, [selB]: a } })) })),
+      isKeys: m.btnCat === 'Keys' && selB !== 'left',
+      record: () => this.setM({ recording: !m.recording }, false), recBg: m.recording ? ACC : HI, recFg: m.recording ? '#2a1406' : TXT,
+      recLabel: m.recording ? '● Listening…' : 'Record a shortcut', recHint: m.recording ? 'Press the keys together now.' : 'Or press the keys yourself.',
+      debounce: m.debounce, debS: this.slider(m.debounce, 0, 20, v => this.setM({ debounce: Math.round(v) })),
+      battery: m.battery, batPct: m.battery + '%',
+      sleep: m.sleep, sleepS: this.slider(m.sleep, 0.5, 30, v => this.setM({ sleep: Math.round(v * 2) / 2 })),
+      deep: m.deep, deepS: this.slider(m.deep, 1, 60, v => this.setM({ deep: Math.round(v) })),
+      notConfirm: !m.confirmReset, confirmReset: m.confirmReset,
+      writeAll: () => this.flash('Wrote every setting to the mouse'), askReset: () => this.setM({ confirmReset: true }, false), cancelReset: () => this.setM({ confirmReset: false }, false),
+      doReset: () => { this.setState({ m: M_DEFAULT() }); this.flash('Mouse reset to factory settings'); },
+    };
+
+    // ---- keyboard ----
+    const kTabName = s.tabs.keyboard;
+    const hueDeg = k.hue / 255 * 360;
+    const glowFor = key => {
+      if (k.effect === 'All Off') return null;
+      const a = (0.25 + 0.75 * k.bright / 255).toFixed(2);
+      let h = hueDeg, sat = 100;
+      if (k.effect === 'Alphas Mods') h = key.kind === 'mod' ? hueDeg + 40 : hueDeg;
+      else if (k.effect === 'Gradient Up Down') h = hueDeg + key.y * 18;
+      else if (k.effect === 'Gradient Left Right') h = hueDeg + key.x * 9;
+      else if (k.effect === 'Band Sat') sat = 30 + Math.abs(8 - key.x) * 9;
+      else if (KFX.find(f => f[0] === k.effect)[1] === 'Cycle') h = key.x * 20 + (k.effect === 'Rainbow Moving Chevron' ? key.y * 25 : 0);
+      return `hsla(${Math.round(h)},${Math.min(100, sat)}%,58%,${a})`;
+    };
+    const keys = KEYS.map(key => {
+      const a = kTabName === 'keymap' ? this.kbAssign(k.layer, key) : { l: key.leg, c: key.code };
+      const lines = String(a.l).split('\n');
+      const ghost = kTabName === 'keymap' && a.c === 'KC_TRNS' && k.layer > 0;
+      let bg = key.kind === 'mod' ? '#a8a49c' : key.kind === 'alpha' ? '#e6e2da' : ACC, fg = key.kind === 'accent' || key.kind === 'knob' ? '#2a1406' : '#2a2825';
+      if (ghost) { bg = '#2a2c30'; fg = '#6b6d72'; }
+      let shadow = 'inset 0 -4px 0 rgba(0,0,0,.2)';
+      if (kTabName === 'tester') { bg = k.held[key.id] ? ACC : k.seen[key.id] ? OK : '#e6e2da'; fg = '#2a2825'; }
+      if (kTabName === 'lighting') { const g = glowFor(key); if (g) shadow += `, 0 6px 14px -3px ${g}, 0 2px 0 0 ${g}`; }
+      if (kTabName === 'keymap' && k.sel === key.id) shadow += ', 0 0 0 2px #1a1b1e, 0 0 0 4px ' + ACC;
+      const long = lines.some(l => l.length > 3);
+      return {
+        left: (key.x / 17.75 * 100).toFixed(3) + '%', top: (key.y * 20) + '%', width: (key.w / 17.75 * 100).toFixed(3) + '%',
+        l1: lines[0], l2: lines[1] || '', two: lines.length > 1, bg, fg, shadow, radius: key.kind === 'knob' ? '50%' : '7px', fs: long ? '11.5px' : lines.length > 1 ? '12.5px' : '15px',
+        onClick: () => {
+          if (kTabName === 'keymap') this.setK({ sel: k.sel === key.id ? null : key.id, encSlot: 'press' });
+          else if (kTabName === 'tester') { this.press(key, true); setTimeout(() => this.press(key, false), 140); }
+        },
+      };
+    });
+    const sel = k.sel ? KEYS.find(x => x.id === k.sel) : null;
+    const selA = sel ? (sel.id === 'knob' ? k.enc[k.encSlot] : this.kbAssign(k.layer, sel)) : null;
+    const q = k.search.trim().toLowerCase();
+    const codeList = q ? ALLCODES.filter(c => (c.l + ' ' + c.c + ' ' + c.d).toLowerCase().includes(q)) : CODES[k.cat];
+    const LAYERS = [['0', 'Base'], ['1', 'Fn'], ['2', 'Mac'], ['3', 'Mac Fn']];
+    const kb = {
+      showBoard: isKb && ['keymap', 'lighting', 'tester'].includes(kTabName), keys,
+      layers: LAYERS.map(([n, label]) => ({ n, label, bg: String(k.layer) === n ? ACC : 'transparent', fg: String(k.layer) === n ? '#2a1406' : SOFT, onClick: () => this.setK({ layer: +n }) })),
+      layerHint: ['What each key does normally.', 'Active while MO(1) or Space is held. ▽ keys fall through to the base layer.', 'The Mac layout.', 'Fn on the Mac layout.'][k.layer],
+      cats: Object.keys(CODES).map(c => ({ label: c, bg: k.cat === c && !q ? ACC : 'transparent', fg: k.cat === c && !q ? '#2a1406' : SOFT, onClick: () => this.setK({ cat: c, search: '' }) })),
+      search: k.search, onSearch: e => this.setK({ search: e.target.value }),
+      codes: codeList.map(c => ({ ...c, l: c.l || '✕', bg: c.c.startsWith('KC_') && c.l.length <= 1 ? '#e6e2da' : '#a8a49c', fg: '#2a2825', onClick: () => this.assign(c) })),
+      pickOpacity: sel ? 1 : 0.55,
+      free: k.free, onFree: e => this.setK({ free: e.target.value }), applyFree: () => k.free.trim() && this.assign({ l: k.free.trim(), c: k.free.trim() }),
+      noSel: !sel, hasSel: !!sel, isKnob: sel && sel.id === 'knob',
+      selLabel: selA ? String(selA.l).replace('\n', ' ') : '', selCode: selA ? selA.c : '', selDesc: selA ? (descOf(selA.c) || (sel.id === 'knob' ? 'Rotary knob' : 'Custom keycode')) : '', selRadius: sel && sel.id === 'knob' ? '50%' : '9px',
+      encRows: [['press', 'Press'], ['left', 'Turn left ↺'], ['right', 'Turn right ↻']].map(([id, label]) => ({ label, code: k.enc[id].c, bd: k.encSlot === id ? ACC : '#2e3035', bg: k.encSlot === id ? TINT : 'transparent', onClick: () => this.setK({ encSlot: id }) })),
+      setTrns: () => this.assign({ l: '▽', c: 'KC_TRNS' }), setNone: () => this.assign({ l: '', c: 'KC_NO' }),
+    };
+    const fxq = k.fxFilter.trim().toLowerCase();
+    const uses = KFX_COLOUR.includes(k.effect);
+    const kl = {
+      filter: k.fxFilter, onFilter: e => this.setK({ fxFilter: e.target.value }),
+      effects: KFX.filter(f => !fxq || f[0].toLowerCase().includes(fxq)).map(([name]) => ({ name, bd: k.effect === name ? ACC : 'transparent', bg: k.effect === name ? TINT : 'transparent', fg: k.effect === name ? ACC : TXT, onClick: () => this.setK({ effect: name }, 'Written to the keyboard') })),
+      brightPct: Math.round(k.bright / 255 * 100) + '%', brightS: this.slider(k.bright, 0, 255, v => this.setK({ bright: Math.round(v) })),
+      speedPct: Math.round(k.speed / 255 * 100) + '%', speedS: this.slider(k.speed, 0, 255, v => this.setK({ speed: Math.round(v) })),
+      showSpeed: !KFX_STATIC.includes(k.effect), isOff: k.effect === 'All Off',
+      colour: `hsl(${Math.round(hueDeg)},100%,58%)`, hueS: this.slider(k.hue, 0, 255, v => this.setK({ hue: Math.round(v) })),
+      swatches: [[0, '#ff2a2a'], [20, '#ff8a1f'], [36, '#ffd21f'], [85, '#2bff4a'], [128, '#24f0f0'], [170, '#2a4bff'], [200, '#a23bff'], [230, '#ff3bb0']].map(([h, c]) => ({ c, ring: Math.abs(k.hue - h) < 3 ? '0 0 0 2px #1a1b1e, 0 0 0 4px #e8e6e1' : 'none', onClick: () => this.setK({ hue: h }, 'Written to the keyboard') })),
+      colourOpacity: uses ? 1 : 0.45, noColour: !uses && k.effect !== 'All Off',
+    };
+    const mtext = k.macros[k.macroSel];
+    const used = k.macros.reduce((n, t) => n + (t ? macroBytes(t) : 0), 0);
+    const mDirty = k.macrosSaved && k.macros.some((t, i) => t !== k.macrosSaved[i]);
+    const km = {
+      list: k.macros.map((t, i) => ({ name: 'M' + i, preview: t || 'empty', fg: t ? SOFT : '#55575c', nameFg: i === k.macroSel ? ACC : DIM, bg: i === k.macroSel ? '#26282c' : 'transparent', onClick: () => this.setK({ macroSel: i }) })),
+      name: 'M' + k.macroSel, text: mtext, onText: e => { const v = e.target.value; this.setK(kk => ({ macros: kk.macros.map((t, i) => i === kk.macroSel ? v : t) })); },
+      tokens: [['{KC_A}', 'Tap a key'], ['{KC_LCTL,KC_C}', 'Keys together'], ['{+KC_LSFT}', 'Hold'], ['{-KC_LSFT}', 'Release'], ['{250}', 'Wait']].map(([t, d]) => ({ t, d, onClick: () => this.setK(kk => ({ macros: kk.macros.map((x, i) => i === kk.macroSel ? x + t : x) })) })),
+      steps: parseMacro(mtext), empty: !mtext, used, usePct: Math.min(100, used / 3322 * 100).toFixed(1) + '%',
+      saveBg: mDirty ? ACC : '#2e3035', saveFg: mDirty ? '#2a1406' : '#6b6d72', btnFg: mDirty ? TXT : '#6b6d72',
+      save: () => mDirty && this.setK(kk => ({ macrosSaved: [...kk.macros] }), 'Macros saved to the keyboard'),
+      revert: () => mDirty && this.setK(kk => ({ macros: [...kk.macrosSaved] })),
+    };
+    const seenN = Object.keys(k.seen).length;
+    const kt = { seen: seenN, pct: (seenN / 72 * 100).toFixed(1) + '%', events: k.events, waiting: !k.events.length, reset: () => this.setK({ seen: {}, held: {}, events: [] }) };
+    const kd = {
+      managed: k.managed, unmanaged: !k.managed, dialog: k.dialog,
+      modes: this.seg(['Windows', 'Mac'], k.mode, v => this.setK({ mode: v }, `Switched to the ${v} layout`)),
+      openDialog: () => this.setK({ dialog: true }), closeDialog: () => this.setK({ dialog: false }),
+      takeOver: () => this.setK({ dialog: false, managed: true }, 'octo hub now switches the layout'),
+      release: () => this.setK({ managed: false, mode: 'Windows' }, 'Switch keys restored on the keyboard'),
+      saveFile: () => this.flash('Saved gmk70-layout.json'), loadFile: () => this.flash('Loaded layout file'),
+      from: k.from, to: k.to, onFrom: e => this.setK({ from: e.target.value }), onTo: e => this.setK({ to: e.target.value }),
+      copy: () => this.flash(`Copied layer ${k.from} over layer ${k.to}`), blink: () => this.flash('Blinking the lights'),
+      resetKeys: () => this.flash('Ask before reset (not wired in the mock)'), boot: () => this.flash('Ask before bootloader (not wired in the mock)'),
+      info: [{ k: 'Definition', v: '~/.config/hidra/definitions/342d_e491.json' }, { k: 'VIA protocol', v: '12' }, { k: 'Matrix', v: '10 × 9' }, { k: 'Layers', v: '4' }, { k: 'Encoders', v: '1' }, { k: 'Macros', v: '16 slots, 3322 bytes' }],
+    };
+
+    // ---- pedal ----
+    const stored = p.presets[p.sounding];
+    const pDirty = JSON.stringify(p.live) !== JSON.stringify(stored);
+    const blocks = BLOCKS.map((b, bi) => {
+      const v = p.live[b.k];
+      return {
+        name: b.n, arrow: bi > 0, flex: b.k === 'amp' ? '2 1 380px' : b.k === 'mod' ? '1 1 230px' : '1 1 170px', minW: b.k === 'amp' ? '340px' : b.k === 'mod' ? '230px' : '170px',
+        bd: v.on ? '#33353a' : '#26282c', nameFg: v.on ? TXT : DIM, bodyOpacity: v.on ? 1 : 0.4,
+        sw: this.swSmall(v.on, () => this.setLive(b.k, { on: !v.on })),
+        hasStep: !!b.step, stepText: b.step ? b.step[3] + v[b.step[0]] : '',
+        stepMinus: () => b.step && this.setLive(b.k, { [b.step[0]]: Math.max(b.step[1], v[b.step[0]] - 1) }),
+        stepPlus: () => b.step && this.setLive(b.k, { [b.step[0]]: Math.min(b.step[2], v[b.step[0]] + 1) }),
+        hasSeg: !!b.seg, seg: b.seg ? b.seg[1].map((label, i) => ({ label, bg: v.fx === i + 1 ? ACC : 'transparent', fg: v.fx === i + 1 ? '#2a1406' : SOFT, onClick: () => this.setLive(b.k, { fx: i + 1 }) })) : [],
+        knobs: b.knobs.map(([key, label, min, max]) => {
+          const val = v[key], a = (val - min) / (max - min) * 270;
+          return {
+            label, val, rot: (-135 + a).toFixed(1) + 'deg',
+            arc: `conic-gradient(from 225deg, ${v.on ? ACC : '#55575c'} 0deg ${a.toFixed(1)}deg, #2e3035 ${a.toFixed(1)}deg 270deg, transparent 270deg)`,
+            down: this.knobDown(() => this.state.p.live[b.k][key], nv => this.setLive(b.k, { [key]: nv }), min, max),
+            reset: () => this.setLive(b.k, { [key]: stored[b.k][key] }),
+          };
+        }),
+      };
+    });
+    const pp = {
+      slot: slotName(p.sounding), dirty: pDirty && !p.bypass, clean: !pDirty && !p.bypass, bypass: p.bypass,
+      prev: () => this.loadSlot((p.sounding + 35) % 36), next: () => this.loadSlot((p.sounding + 1) % 36),
+      save: () => { this.setP(pp => ({ presets: pp.presets.map((x, i) => i === pp.sounding ? clone(pp.live) : x) })); this.flash('Saved to ' + slotName(p.sounding)); },
+      target: p.target, onTarget: e => { const t = +e.target.value; if (t === p.sounding) return; this.setP(pp => ({ presets: pp.presets.map((x, i) => i === t ? clone(pp.live) : x), live: clone(pp.live), sounding: t, presets_: null })); this.setP(pp => ({ live: clone(pp.presets[t]) })); this.flash('Saved to ' + slotName(t)); },
+      slots: [{ v: String(p.sounding), label: 'Save to…' }, ...Array.from({ length: 36 }, (_, i) => i).filter(i => i !== p.sounding).map(i => ({ v: String(i), label: slotName(i) }))],
+      revert: () => this.setP(pp => ({ live: clone(pp.presets[pp.sounding]) })),
+      toggleBypass: () => this.setP({ bypass: !p.bypass }), byp: this.sw(p.bypass, null),
+      chainOpacity: p.bypass ? 0.35 : 1, chainEvents: p.bypass ? 'none' : 'auto', blocks,
+    };
+    pp.target = String(p.sounding);
+    const pr = {
+      banks: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rows: [0, 1, 2, 3].map(letter => ({
+        letter: 'ABCD'[letter],
+        cells: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(bank => {
+          const i = (bank - 1) * 4 + letter, pre = i === p.sounding ? p.live : p.presets[i], here = i === p.sounding;
+          return { name: slotName(i), bd: here ? ACC : '#2e3035', bg: here ? TINT : '#1e2023', fg: here ? ACC : TXT, dots: ['gate', 'amp', 'mod', 'dly', 'rev', 'cab'].map(b => pre[b].on ? (here ? ACC : SOFT) : '#3a3c42'), onClick: () => this.loadSlot(i) };
+        }),
+      })),
+      backup: () => this.flash('Saved tank-g-presets.bin'), restore: () => this.flash('Pick a backup file…'),
+    };
+
+    return {
+      isHome: s.screen === 'home', isDevice: s.screen !== 'home', isMouse, isKb, isPedalLive: isPedal && pedalOn,
+      homeCards: layout === 'cards', homeRows: layout === 'rows',
+      devices, cur, tabs, menuOpen: s.menuOpen,
+      toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }), closeMenu: () => this.setState({ menuOpen: false }), goHome: () => this.go('home'),
+      saved: !!s.saved, savedText: s.saved || '',
+      mStatus: { dot: act.c, dpi: act.dpi, bat: m.battery + '%', batText: m.battery + '%' },
+      kStatus: { mode: k.mode }, pStatus: { slot: slotName(p.sounding), bypass: p.bypass },
+      toDpi: () => this.tab('mouse', 'dpi'), toPower: () => this.tab('mouse', 'power'), toKbDevice: () => this.tab('keyboard', 'device'), toPresets: () => this.tab('pedal', 'presets'),
+      mTab: { dpi: on('mouse', 'dpi'), lighting: on('mouse', 'lighting'), buttons: on('mouse', 'buttons'), power: on('mouse', 'power') },
+      kTab: { keymap: on('keyboard', 'keymap'), lighting: on('keyboard', 'lighting'), macros: on('keyboard', 'macros'), tester: on('keyboard', 'tester'), device: on('keyboard', 'device') },
+      pTab: { tone: on('pedal', 'tone') && pedalOn, presets: on('pedal', 'presets') && pedalOn },
+      pedalMissing: isPedal && !pedalOn, pedalRetry: () => this.setState({ pedalForced: true }),
+      ms: MS, m: mouse, kb, kl, km, kt, kd, pp, pr,
+    };
+  }
+}
+</script>
+</body>
+</html>

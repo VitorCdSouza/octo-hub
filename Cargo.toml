@@ -1,0 +1,24 @@
+[package]
+name = "octo-hub"
+version = "0.1.0"
+license = "GPL-3.0-or-later"
+description = "One Linux app for the Attack Shark X6 mouse, the GMK70 keyboard and the Tank-G pedal"
+edition = "2024"
+
+[[bin]]
+name = "octo-hub"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+eframe = { version = "0.36.2", default-features = false, features = ["accesskit", "default_fonts", "glow", "wayland", "x11"] }
+hidra = { path = "../hidra" }
+libc = "0.2.190"
+remora = { path = "../remora" }
+rfd = "0.17.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.153"
+
+[profile.release]
+strip = true
+lto = "thin"
