@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 pub fn run(f: Flags) -> Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("octo hub")
+            .with_title("Octo Hub")
             .with_app_id("octo-hub")
             .with_inner_size([1280.0, 860.0])
             .with_min_inner_size([760.0, 560.0])
